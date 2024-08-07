@@ -1,75 +1,92 @@
-#include "card.h"
-#include "card_list.h"
 #include <iostream>
 #include <cassert>
-
-using namespace std;
+#include "card.h"
+#include "card_list.h"
 
 void testInsert() {
-    CardList cardList;
-    cardList.insert(Card("hearts", 10));
-    cardList.insert(Card("clubs", 2));
-    cardList.insert(Card("diamonds", 5));
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    // Test if cards are inserted correctly
-    assert(cardList.find(Card("hearts", 10)) != nullptr);
-    assert(cardList.find(Card("clubs", 2)) != nullptr);
-    assert(cardList.find(Card("diamonds", 5)) != nullptr);
-    cout << "testInsert passed" << endl;
-}
-void testFind() {
-    CardList cardList;
-    cardList.insert(Card("hearts", 10));
-    cardList.insert(Card("clubs", 2));
-    cardList.insert(Card("diamonds", 5));
+    assert(cl.contains(Card("c", "a")));
+    assert(cl.contains(Card("d", "2")));
+    assert(cl.contains(Card("h", "k")));
+    assert(cl.contains(Card("s", "5")));
 
-    // Test if find works correctly
-    assert(cardList.find(Card("hearts", 10)) != nullptr);
-    assert(cardList.find(Card("spades", 7)) == nullptr);
-    cout << "testFind passed" << endl;
+    std::cout << "testInsert passed." << std::endl;
 }
 
 void testDelete() {
-    CardList cardList;
-    cardList.insert(Card("hearts", 10));
-    cardList.insert(Card("clubs", 2));
-    cardList.insert(Card("diamonds", 5));
-    cardList.remove(Card("clubs", 2));
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    // Test if delete works correctly
-    assert(cardList.find(Card("clubs", 2)) == nullptr);
-    cout << "testDelete passed" << endl;
+    cl.remove(Card("d", "2"));
+    assert(!cl.contains(Card("d", "2")));
+
+    cl.remove(Card("h", "k"));
+    assert(!cl.contains(Card("h", "k")));
+
+    std::cout << "testDelete passed." << std::endl;
+}
+
+void testFind() {
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
+
+    assert(cl.contains(Card("c", "a")));
+    assert(cl.contains(Card("d", "2")));
+    assert(cl.contains(Card("h", "k")));
+    assert(cl.contains(Card("s", "5")));
+    assert(!cl.contains(Card("d", "3")));
+
+    std::cout << "testFind passed." << std::endl;
 }
 
 void testSuccessor() {
-    CardList cardList;
-    cardList.insert(Card("hearts", 10));
-    cardList.insert(Card("clubs", 2));
-    cardList.insert(Card("diamonds", 5));
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    // Test if successor works correctly
-    assert(cardList.successor(Card("clubs", 2))->value == 5);
-    cout << "testSuccessor passed" << endl;
+    assert(cl.successor(Card("c", "a")) == Card("d", "2"));
+    assert(cl.successor(Card("d", "2")) == Card("s", "5"));
+    assert(cl.successor(Card("s", "5")) == Card("h", "k"));
+    assert(cl.successor(Card("h", "k")).suit == "" && cl.successor(Card("h", "k")).value == "");
+
+    std::cout << "testSuccessor passed." << std::endl;
 }
 
 void testPredecessor() {
-    CardList cardList;
-    cardList.insert(Card("hearts", 10));
-    cardList.insert(Card("clubs", 2));
-    cardList.insert(Card("diamonds", 5));
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    // Test if predecessor works correctly
-    assert(cardList.predecessor(Card("diamonds", 5))->value == 2);
-    cout << "testPredecessor passed" << endl;
+    assert(cl.predecessor(Card("h", "k")) == Card("s", "5"));
+    assert(cl.predecessor(Card("s", "5")) == Card("d", "2"));
+    assert(cl.predecessor(Card("d", "2")) == Card("c", "a"));
+    assert(cl.predecessor(Card("c", "a")).suit == "" && cl.predecessor(Card("c", "a")).value == "");
+
+    std::cout << "testPredecessor passed." << std::endl;
 }
 
 int main() {
     testInsert();
-    testFind();
     testDelete();
+    testFind();
     testSuccessor();
     testPredecessor();
-    cout << "All tests passed!" << endl;
+
+    std::cout << "All tests passed!" << std::endl;
     return 0;
 }
-

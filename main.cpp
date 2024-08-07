@@ -1,67 +1,91 @@
-// Feb 14: This file should implement the game using a custom implementation of a BST (that is based on your implementation from lab02)
-// main.cpp
-// This file should implement the game using a custom implementation of a BST (that is based on your implementation from lab02)
 #include <iostream>
 #include <fstream>
-#include <string>
-#include "card.h"
 #include "card_list.h"
 
 using namespace std;
 
-void loadCards(const string& filename, CardList& cards) {
-    ifstream file(filename);
-    string suit;
-    int value;
-
+void read_cards(ifstream& file, CardBST& cards) {
+    char suit;
+    string value;
     while (file >> suit >> value) {
         cards.insert(Card(suit, value));
     }
-
-    file.close();
 }
 
-void printCards(const CardList& cards) {
-    for (auto it = cards.begin(); it != cards.end(); ++it) {
-        cout << *it << endl;
+// Helper function for in-order traversal and finding matches for Alice
+bool alice_turn(Node* node, CardBST& bob) {
+    if (!node) return false;
+
+    // Traverse the left subtree
+    if (alice_turn(node->left, bob)) return true;
+
+    // Check current node
+    if (bob.find(node->data)) {
+        cout << "Alice picked matching card " << node->data << endl;
+        bob.remove(node->data);
+        return true;
     }
+
+    // Traverse the right subtree
+    return alice_turn(node->right, bob);
 }
 
-void playGame(CardList& aliceCards, CardList& bobCards) {
+// Helper function for reverse in-order traversal and finding matches for Bob
+bool bob_turn(Node* node, CardBST& alice) {
+    if (!node) return false;
+
+    // Traverse the right subtree
+    if (bob_turn(node->right, alice)) return true;
+
+    // Check current node
+    if (alice.find(node->data)) {
+        cout << "Bob picked matching card " << node->data << endl;
+        alice.remove(node->data);
+        return true;
+    }
+
+    // Traverse the left subtree
+    return bob_turn(node->left, alice);
+}
+
+void play_game(CardBST& alice, CardBST& bob) {
+    bool found_match;
+    do {
+        // Alice's turn
+        found_match = alice_turn(alice.get_root(), bob);
+
+        // If Alice found a match, Bob gets a turn
+        if (found_match) {
+            found_match = bob_turn(bob.get_root(), alice);
+        }
+    } while (found_match); // Continue until no matches are found
+
     cout << "Alice's cards:" << endl;
-    printCards(aliceCards);
+    alice.in_order_traversal();
 
     cout << "Bob's cards:" << endl;
-    printCards(bobCards);
-
-    cout << "Alice plays:" << endl;
-    for (auto it = aliceCards.begin(); it != aliceCards.end(); ++it) {
-        cout << *it << endl;
-        bobCards.remove(*it);
-    }
-
-    cout << "Bob plays:" << endl;
-    for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
-        cout << *it << endl;
-        aliceCards.remove(*it);
-    }
-
-    cout << "Game over!" << endl;
+    bob.in_order_traversal();
 }
 
-int main(int argc, char** argv) {
-    if (argc < 3) {
-        cout << "Please provide 2 file names" << endl;
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << endl;
         return 1;
     }
 
-    CardList aliceCards;
-    CardList bobCards;
+    ifstream alice_file(argv[1]);
+    ifstream bob_file(argv[2]);
 
-    loadCards(argv[1], aliceCards);
-    loadCards(argv[2], bobCards);
+    if (!alice_file.is_open() || !bob_file.is_open()) {
+        cerr << "Error opening files." << endl;
+        return 1;
+    }
 
-    playGame(aliceCards, bobCards);
+    CardBST alice_cards, bob_cards;
+    read_cards(alice_file, alice_cards);
+    read_cards(bob_file, bob_cards);
+
+    play_game(alice_cards, bob_cards);
 
     return 0;
 }

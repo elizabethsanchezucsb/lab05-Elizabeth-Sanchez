@@ -1,5 +1,7 @@
 #include "card_list.h"
 #include <iostream>
+#include "card.h"
+
 
 CardBST::CardBST() : root(nullptr) {}
 

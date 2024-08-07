@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include "card_list.h"
+#include "card.h"
 
 using namespace std;
 

@@ -7,6 +7,44 @@
 #include "card.h"
 
 using namespace std;
+void loadCards(const string& filename, set<Card>& cards) {
+    ifstream infile(filename);
+    string suit;
+    int value;
+    while (infile >> suit >> value) {
+        cards.insert(Card(suit, value));
+    }
+}
+
+void printCards(const set<Card>& cards) {
+    for (const auto& card : cards) {
+        cout << card << endl;
+    }
+}
+
+void playGame(set<Card>& aliceCards, set<Card>& bobCards) {
+    // Game logic here
+    auto aliceIt = aliceCards.begin();
+    auto bobIt = bobCards.rbegin(); // reverse iterator for Bob's cards
+
+    while (aliceIt != aliceCards.end() && bobIt != bobCards.rend()) {
+        if (*aliceIt == *bobIt) {
+            cout << "Alice picked matching card " << *aliceIt << endl;
+            cout << "Bob picked matching card " << *bobIt << endl;
+            aliceIt = aliceCards.erase(aliceIt);
+            bobIt = set<Card>::reverse_iterator(bobCards.erase(next(bobIt).base()));
+        } else if (*aliceIt < *bobIt) {
+            ++aliceIt;
+        } else {
+            ++bobIt;
+        }
+    }
+
+    cout << "Alice's cards:" << endl;
+    printCards(aliceCards);
+    cout << "Bob's cards:" << endl;
+    printCards(bobCards);
+}
 
 int main(int argv, char** argc){
   if(argv < 3){
@@ -14,7 +52,7 @@ int main(int argv, char** argc){
     return 1;
   }
   
-  ifstream cardFile1 (argc[1]);
+  ifstream cardFile1 (argc[1]); //basically ifstream == cin >> 
   ifstream cardFile2 (argc[2]);
   string line;
 

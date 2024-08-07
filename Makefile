@@ -22,7 +22,7 @@ main.o: main.cpp
 tests.o: tests.cpp
 	${CXX} ${CXXFLAGS} tests.cpp -c
 
-card_list.o: card_list.cpp card_list.h
+card_list.o: card_list.cpp card_listsh
 	${CXX} ${CXXFLAGS} card_list.cpp -c
 
 card.o: card.cpp card.h

@@ -7,6 +7,7 @@
 #include "card.h"
 
 using namespace std;
+
 void loadCards(const string& filename, set<Card>& cards) {
     ifstream infile(filename);
     string suit;
@@ -23,20 +24,28 @@ void printCards(const set<Card>& cards) {
 }
 
 void playGame(set<Card>& aliceCards, set<Card>& bobCards) {
-    // Game logic here
-    auto aliceIt = aliceCards.begin();
-    auto bobIt = bobCards.rbegin(); // reverse iterator for Bob's cards
+    bool foundMatch = true;
+    while (foundMatch) {
+        foundMatch = false;
 
-    while (aliceIt != aliceCards.end() && bobIt != bobCards.rend()) {
-        if (*aliceIt == *bobIt) {
-            cout << "Alice picked matching card " << *aliceIt << endl;
-            cout << "Bob picked matching card " << *bobIt << endl;
-            aliceIt = aliceCards.erase(aliceIt);
-            bobIt = set<Card>::reverse_iterator(bobCards.erase(next(bobIt).base()));
-        } else if (*aliceIt < *bobIt) {
-            ++aliceIt;
-        } else {
-            ++bobIt;
+        for (const auto& card : aliceCards) {
+            if (bobCards.find(card) != bobCards.end()) {
+                cout << "Alice picked matching card " << card << endl;
+                aliceCards.erase(card);
+                bobCards.erase(card);
+                foundMatch = true;
+                break;
+            }
+        }
+
+        for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
+            if (aliceCards.find(*it) != aliceCards.end()) {
+                cout << "Bob picked matching card " << *it << endl;
+                bobCards.erase(*it);
+                aliceCards.erase(*it);
+                foundMatch = true;
+                break;
+            }
         }
     }
 
@@ -46,33 +55,27 @@ void playGame(set<Card>& aliceCards, set<Card>& bobCards) {
     printCards(bobCards);
 }
 
-int main(int argv, char** argc){
-  if(argv < 3){
-    cout << "Please provide 2 file names" << endl;
-    return 1;
-  }
-  
-  ifstream cardFile1 (argc[1]); //basically ifstream == cin >> 
-  ifstream cardFile2 (argc[2]);
-  string line;
+int main(int argc, char** argv) {
+    if (argc < 3) {
+        cout << "Please provide 2 file names" << endl;
+        return 1;
+    }
 
-  if (cardFile1.fail() || cardFile2.fail() ){
-    cout << "Could not open file " << argc[2];
-    return 1;
-  }
+    ifstream cardFile1(argv[1]);
+    ifstream cardFile2(argv[2]);
 
-  //Read each file
-  while (getline (cardFile1, line) && (line.length() > 0)){
+    if (cardFile1.fail() || cardFile2.fail()) {
+        cout << "Could not open file " << argv[1] << " or " << argv[2] << endl;
+        return 1;
+    }
 
-  }
-  cardFile1.close();
+    set<Card> aliceCards;
+    set<Card> bobCards;
 
+    loadCards(argv[1], aliceCards);
+    loadCards(argv[2], bobCards);
 
-  while (getline (cardFile2, line) && (line.length() > 0)){
+    playGame(aliceCards, bobCards);
 
-  }
-  cardFile2.close();
-  
-  
-  return 0;
+    return 0;
 }

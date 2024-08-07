@@ -1,87 +1,65 @@
 // Feb 14: This file should implement the game using a custom implementation of a BST (that is based on your implementation from lab02)
+// main.cpp
+// This file should implement the game using a custom implementation of a BST (that is based on your implementation from lab02)
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "card.h"
 #include "card_list.h"
-//Do not include set in this file
-
+// Do not include set in this file
 using namespace std;
 
-
-void loadCards(const string& filename, set<Card>& cards) {
-    ifstream infile(filename);
+void loadCards(const string& filename, CardList& cards) {
+    ifstream file(filename);
     string suit;
     int value;
-    while (infile >> suit >> value) {
+    while (file >> suit >> value) {
         cards.insert(Card(suit, value));
     }
+    file.close();
 }
 
-void printCards(const set<Card>& cards) {
-    for (const auto& card : cards) {
-        cout << card << endl;
+void printCards(const CardList& cards) {
+    for (auto it = cards.begin(); it != cards.end(); ++it) {
+        cout << *it << endl;
     }
 }
 
-void playGame(set<Card>& aliceCards, set<Card>& bobCards) {
-    bool foundMatch = true;
-    while (foundMatch) {
-        foundMatch = false;
-
-        for (const auto& card : aliceCards) {
-            if (bobCards.find(card) != bobCards.end()) {
-                cout << "Alice picked matching card " << card << endl;
-                aliceCards.erase(card);
-                bobCards.erase(card);
-                foundMatch = true;
-                break;
-            }
+void playGame(CardList& aliceCards, CardList& bobCards) {
+    for (auto it = aliceCards.begin(); it != aliceCards.end(); ++it) {
+        if (bobCards.find(*it)) {
+            cout << "Alice picked matching card " << *it << endl;
+            bobCards.remove(*it);
         }
+    }
 
-        for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
-            if (aliceCards.find(*it) != aliceCards.end()) {
-                cout << "Bob picked matching card " << *it << endl;
-                bobCards.erase(*it);
-                aliceCards.erase(*it);
-                foundMatch = true;
-                break;
-            }
+    for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
+        if (aliceCards.find(*it)) {
+            cout << "Bob picked matching card " << *it << endl;
+            aliceCards.remove(*it);
         }
     }
 
     cout << "Alice's cards:" << endl;
     printCards(aliceCards);
+
     cout << "Bob's cards:" << endl;
     printCards(bobCards);
 }
-int main(int argv, char** argc){
-  if(argv < 3){
-    cout << "Please provide 2 file names" << endl;
-    return 1;
-  }
-  
-  ifstream cardFile1 (argc[1]); //basically ifstream == cin >> 
-  ifstream cardFile2 (argc[2]);
-  string line;
 
-  if (cardFile1.fail() || cardFile2.fail() ){
-    cout << "Could not open file " << argc[2];
-    return 1;
-  }
+int main(int argc, char** argv) {
+    if (argc < 3) {
+        cout << "Please provide 2 file names" << endl;
+        return 1;
+    }
 
-  //Read each file
-  while (getline (cardFile1, line) && (line.length() > 0)){
+    CardList aliceCards;
+    CardList bobCards;
 
-  }
-  cardFile1.close();
+    loadCards(argv[1], aliceCards);
+    loadCards(argv[2], bobCards);
 
+    playGame(aliceCards, bobCards);
 
-  while (getline (cardFile2, line) && (line.length() > 0)){
-
-  }
-  cardFile2.close();
-  
-  
-  return 0;
+    return 0;
 }

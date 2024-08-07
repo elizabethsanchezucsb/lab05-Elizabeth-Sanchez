@@ -1,32 +1,22 @@
-CXX=g++ 
-CXXFLAGS = -g --std=c++20 -Wall
+all: game_set game
 
-all: game game_set
+game_set: main_set.o card.o
+	g++ -o game_set main_set.o card.o
 
-game_set: card.o main_set.o
-	${CXX} ${CXXFLAGS} card.o main_set.o -o game_set
+game: main.o card.o card_list.o
+	g++ -o game main.o card.o card_list.o
 
-game: card_list.o main.o
-	${CXX} ${CXXFLAGS} card_list.o main.o -o game
+main_set.o: main_set.cpp card.h
+	g++ -c main_set.cpp
 
-tests: card.o card_list.o tests.o
-	${CXX} ${CXXFLAGS} card.o card_list.o tests.o -o tests
-	./tests
-
-main_set.o: main_set.cpp
-	${CXX} ${CXXFLAGS} main_set.cpp -c
-
-main.o: main.cpp
-	${CXX} ${CXXFLAGS} main.cpp -c
-
-tests.o: tests.cpp
-	${CXX} ${CXXFLAGS} tests.cpp -c
-
-card_list.o: card_list.cpp card_list.h
-	${CXX} ${CXXFLAGS} card_list.cpp -c
+main.o: main.cpp card.h card_list.h
+	g++ -c main.cpp
 
 card.o: card.cpp card.h
-	${CXX} ${CXXFLAGS} card.cpp -c
+	g++ -c card.cpp
+
+card_list.o: card_list.cpp card_list.h card.h
+	g++ -c card_list.cpp
 
 clean:
-	rm game_set game *.o
+	rm -f *.o game_set game

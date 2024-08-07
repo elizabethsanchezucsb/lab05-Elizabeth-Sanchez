@@ -6,16 +6,18 @@
 #include <string>
 #include "card.h"
 #include "card_list.h"
-// Do not include set in this file
+
 using namespace std;
 
 void loadCards(const string& filename, CardList& cards) {
     ifstream file(filename);
     string suit;
     int value;
+
     while (file >> suit >> value) {
         cards.insert(Card(suit, value));
     }
+
     file.close();
 }
 
@@ -26,25 +28,25 @@ void printCards(const CardList& cards) {
 }
 
 void playGame(CardList& aliceCards, CardList& bobCards) {
-    for (auto it = aliceCards.begin(); it != aliceCards.end(); ++it) {
-        if (bobCards.find(*it)) {
-            cout << "Alice picked matching card " << *it << endl;
-            bobCards.remove(*it);
-        }
-    }
-
-    for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
-        if (aliceCards.find(*it)) {
-            cout << "Bob picked matching card " << *it << endl;
-            aliceCards.remove(*it);
-        }
-    }
-
     cout << "Alice's cards:" << endl;
     printCards(aliceCards);
 
     cout << "Bob's cards:" << endl;
     printCards(bobCards);
+
+    cout << "Alice plays:" << endl;
+    for (auto it = aliceCards.begin(); it != aliceCards.end(); ++it) {
+        cout << *it << endl;
+        bobCards.remove(*it);
+    }
+
+    cout << "Bob plays:" << endl;
+    for (auto it = bobCards.rbegin(); it != bobCards.rend(); ++it) {
+        cout << *it << endl;
+        aliceCards.remove(*it);
+    }
+
+    cout << "Game over!" << endl;
 }
 
 int main(int argc, char** argv) {

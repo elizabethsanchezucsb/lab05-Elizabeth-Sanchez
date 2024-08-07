@@ -4,21 +4,22 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include <string>
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 class Card {
-public:
+private:
     string suit;
     int value;
 
+public:
     Card(const string& suit, int value);
     
-    bool operator==(const Card& other) const;
     bool operator<(const Card& other) const;
     bool operator>(const Card& other) const;
+    bool operator==(const Card& other) const;
 
     friend ostream& operator<<(ostream& os, const Card& card);
 };

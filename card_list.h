@@ -1,3 +1,4 @@
+
 #ifndef CARD_LIST_H
 #define CARD_LIST_H
 
@@ -8,26 +9,27 @@ public:
     Card data;
     CardNode* left;
     CardNode* right;
-
-    CardNode(const Card& c);
+    CardNode(const Card& c) : data(c), left(nullptr), right(nullptr) {}
 };
 
-class CardBST {
+class CardList {
+public:
+    CardList();
+    ~CardList();
+    void insert(const Card& c);
+    bool remove(const Card& c);
+    bool find(const Card& c) const;
+    Card* successor(const Card& c) const;
+    Card* predecessor(const Card& c) const;
+    void print() const;
+
 private:
     CardNode* root;
-
-    void insert(CardNode*& node, const Card& c);
-    void inorder_print(CardNode* node) const;
-    CardNode* find(CardNode* node, const Card& c) const;  // Private helper
-    void destroy_tree(CardNode* node);
-
-public:
-    CardBST();
-    ~CardBST();
-
-    void insert(const Card& c);
-    bool find(const Card& c) const;  // Public interface
-    void print_inorder() const;
+    void deleteTree(CardNode* node);
+    void printInOrder(CardNode* node) const;
+    CardNode* findNode(const Card& c) const;
+    CardNode* findMin(CardNode* node) const;
+    CardNode* findMax(CardNode* node) const;
 };
 
-#endif
+#endif // CARD_LIST_H

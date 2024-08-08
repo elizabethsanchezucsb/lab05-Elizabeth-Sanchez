@@ -1,46 +1,69 @@
+
+#include "card.h"
+#include "card_list.h"
 #include <iostream>
 #include <fstream>
-#include "card_list.h"
 
-void load_cards(const std::string& filename, CardBST& bst) {
+void readCards(const std::string& filename, CardList& cards) {
     std::ifstream file(filename);
-    std::string suit_str;
-    std::string value_str;
-    while (file >> suit_str >> value_str) {
-        Suit suit;
-        if (suit_str == "c") suit = CLUBS;
-        else if (suit_str == "d") suit = DIAMONDS;
-        else if (suit_str == "s") suit = SPADES;
-        else suit = HEARTS;
-
-        int value;
-        if (value_str == "a") value = 1;
-        else if (value_str == "j") value = 11;
-        else if (value_str == "q") value = 12;
-        else if (value_str == "k") value = 13;
-        else value = std::stoi(value_str);
-
-        bst.insert(Card(suit, value));
+    char suit, value;
+    while (file >> suit >> value) {
+        cards.insert(Card(suit, value));
     }
+}
+
+void playGame(CardList& aliceCards, CardList& bobCards) {
+    CardList aliceMatches;
+    CardList bobMatches;
+
+    // Find matches for Alice
+    for (char suit = 'a'; suit <= 'z'; ++suit) {
+        for (char value = '1'; value <= '9'; ++value) {
+            Card card(suit, value);
+            if (aliceCards.find(card) && bobCards.find(card)) {
+                aliceMatches.insert(card);
+                bobCards.remove(card);
+            }
+        }
+    }
+
+    // Find matches for Bob
+    for (char suit = 'a'; suit <= 'z'; ++suit) {
+        for (char value = '1'; value <= '9'; ++value) {
+            Card card(suit, value);
+            if (bobCards.find(card) && aliceCards.find(card)) {
+                bobMatches.insert(card);
+                aliceCards.remove(card);
+            }
+        }
+    }
+
+    std::cout << "Alice picked matching cards: ";
+    aliceMatches.print();
+
+    std::cout << "Bob picked matching cards: ";
+    bobMatches.print();
+
+    std::cout << "Alice's remaining cards: ";
+    aliceCards.print();
+
+    std::cout << "Bob's remaining cards: ";
+    bobCards.print();
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <alice_file> <bob_file>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
         return 1;
     }
 
-    CardBST alice_bst;
-    CardBST bob_bst;
+    CardList aliceCards;
+    CardList bobCards;
 
-    load_cards(argv[1], alice_bst);
-    load_cards(argv[2], bob_bst);
+    readCards(argv[1], aliceCards);
+    readCards(argv[2], bobCards);
 
-    std::cout << "Alice's cards:\n";
-    alice_bst.print_inorder();
-
-    std::cout << "Bob's cards:\n";
-    bob_bst.print_inorder();
+    playGame(aliceCards, bobCards);
 
     return 0;
 }

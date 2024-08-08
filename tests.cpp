@@ -49,4 +49,4 @@ void testCardListRemove() {
 
 void testCardListSuccessor() {
     CardList list;
-    
+}

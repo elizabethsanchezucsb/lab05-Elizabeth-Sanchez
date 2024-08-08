@@ -3,29 +3,31 @@
 
 #include "card.h"
 
-struct TreeNode {
-    Card card;
-    TreeNode* left;
-    TreeNode* right;
+class CardNode {
+public:
+    Card data;
+    CardNode* left;
+    CardNode* right;
 
-    TreeNode(const Card& c) : card(c), left(nullptr), right(nullptr) {}
+    CardNode(const Card& c);
 };
 
-class CardList {
+class CardBST {
 private:
-    TreeNode* root;
+    CardNode* root;
 
-    void insert(TreeNode*& node, const Card& card);
-    void destroyTree(TreeNode* node);
+    void insert(CardNode*& node, const Card& c);
+    void inorder_print(CardNode* node) const;
+    CardNode* find(CardNode* node, const Card& c) const;
+    void destroy_tree(CardNode* node);
 
 public:
-    CardList();
-    ~CardList();
+    CardBST();
+    ~CardBST();
 
-    void insert(const Card& card);
-    bool find(const Card& card) const;
-    void printInOrder() const;
-    TreeNode* getRoot() const;
+    void insert(const Card& c);
+    bool find(const Card& c) const;
+    void print_inorder() const;
 };
 
-#endif // CARD_LIST_H
+#endif

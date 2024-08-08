@@ -1,74 +1,55 @@
 #include "card_list.h"
 #include <iostream>
 
-CardList::CardList() : root(nullptr) {}
+CardNode::CardNode(const Card& c) : data(c), left(nullptr), right(nullptr) {}
 
-CardList::~CardList() {
-    destroyTree(root);
+CardBST::CardBST() : root(nullptr) {}
+
+CardBST::~CardBST() {
+    destroy_tree(root);
 }
 
-void CardList::destroyTree(TreeNode* node) {
+void CardBST::insert(CardNode*& node, const Card& c) {
+    if (node == nullptr) {
+        node = new CardNode(c);
+    } else if (c < node->data) {
+        insert(node->left, c);
+    } else if (node->data < c) {
+        insert(node->right, c);
+    }
+}
+
+void CardBST::insert(const Card& c) {
+    insert(root, c);
+}
+
+bool CardBST::find(CardNode* node, const Card& c) const {
+    if (node == nullptr) return false;
+    if (node->data == c) return true;
+    if (c < node->data) return find(node->left, c);
+    return find(node->right, c);
+}
+
+bool CardBST::find(const Card& c) const {
+    return find(root, c);
+}
+
+void CardBST::inorder_print(CardNode* node) const {
     if (node) {
-        destroyTree(node->left);
-        destroyTree(node->right);
+        inorder_print(node->left);
+        std::cout << node->data.suit << " " << node->data.value << "\n";
+        inorder_print(node->right);
+    }
+}
+
+void CardBST::print_inorder() const {
+    inorder_print(root);
+}
+
+void CardBST::destroy_tree(CardNode* node) {
+    if (node) {
+        destroy_tree(node->left);
+        destroy_tree(node->right);
         delete node;
     }
-}
-
-void CardList::insert(const Card& card) {
-    insert(root, card);
-}
-
-void CardList::insert(TreeNode*& node, const Card& card) {
-    if (!node) {
-        node = new TreeNode(card);
-    } else if (card < node->card) {
-        insert(node->left, card);
-    } else if (card > node->card) {
-        insert(node->right, card);
-    }
-}
-
-bool CardList::find(const Card& card) const {
-    TreeNode* current = root;
-    while (current) {
-        if (card == current->card) {
-            return true;
-        } else if (card < current->card) {
-            current = current->left;
-        } else {
-            current = current->right;
-        }
-    }
-    return false;
-}
-
-void CardList::printInOrder() const {
-    struct StackNode {
-        TreeNode* treeNode;
-        StackNode* next;
-    };
-    
-    StackNode* stack = nullptr;
-    TreeNode* current = root;
-
-    while (current || stack) {
-        while (current) {
-            stack = new StackNode{current, stack};
-            current = current->left;
-        }
-        
-        if (stack) {
-            current = stack->treeNode;
-            std::cout << current->card << std::endl;
-            StackNode* temp = stack;
-            stack = stack->next;
-            delete temp;
-            current = current->right;
-        }
-    }
-}
-
-TreeNode* CardList::getRoot() const {
-    return root;
 }

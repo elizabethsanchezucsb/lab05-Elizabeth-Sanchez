@@ -2,53 +2,50 @@
 #include <fstream>
 #include <set>
 #include <string>
+#include "card.h"
 
-// Assuming Suit enum is defined somewhere
-enum Suit {
-    CLUBS,
-    DIAMONDS,
-    SPADES,
-    HEARTS
-};
-
-std::istream& operator>>(std::istream& in, Suit& suit) {
-    std::string str;
-    in >> str;
-
-    if (str == "CLUBS") suit = CLUBS;
-    else if (str == "DIAMONDS") suit = DIAMONDS;
-    else if (str == "SPADES") suit = SPADES;
-    else if (str == "HEARTS") suit = HEARTS;
-    else in.setstate(std::ios::failbit);
-
-    return in;
-}
-
-struct Card {
-    Suit suit;
-    int value;
-    // Define the necessary comparison operators for set to work correctly.
-    bool operator<(const Card& other) const {
-        return (suit < other.suit) || (suit == other.suit && value < other.value);
-    }
-};
-
-void loadCardsFromFile(const std::string& filename, std::set<Card>& cardSet) {
+void load_cards(const std::string& filename, std::set<Card>& hand) {
     std::ifstream file(filename);
-    Suit suit;
-    int value;
+    std::string suit_str;
+    std::string value_str;
+    while (file >> suit_str >> value_str) {
+        Suit suit;
+        if (suit_str == "c") suit = CLUBS;
+        else if (suit_str == "d") suit = DIAMONDS;
+        else if (suit_str == "s") suit = SPADES;
+        else suit = HEARTS;
 
-    while (file >> suit >> value) {
-        cardSet.insert(Card{suit, value});
+        int value;
+        if (value_str == "a") value = 1;
+        else if (value_str == "j") value = 11;
+        else if (value_str == "q") value = 12;
+        else if (value_str == "k") value = 13;
+        else value = std::stoi(value_str);
+
+        hand.insert(Card(suit, value));
     }
 }
 
-int main() {
-    std::set<Card> cardSet;
-    loadCardsFromFile("cards.txt", cardSet);
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <alice_file> <bob_file>" << std::endl;
+        return 1;
+    }
 
-    for (const auto& card : cardSet) {
-        std::cout << card.suit << " " << card.value << std::endl;
+    std::set<Card> alice_hand;
+    std::set<Card> bob_hand;
+
+    load_cards(argv[1], alice_hand);
+    load_cards(argv[2], bob_hand);
+
+    std::cout << "Alice's cards:\n";
+    for (const auto& card : alice_hand) {
+        std::cout << card.suit << " " << card.value << "\n";
+    }
+
+    std::cout << "Bob's cards:\n";
+    for (const auto& card : bob_hand) {
+        std::cout << card.suit << " " << card.value << "\n";
     }
 
     return 0;

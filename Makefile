@@ -1,31 +1,16 @@
-CXX = g++
-CXXFLAGS = -std=c++11 -Wall -g
+CC = g++
+CFLAGS = -std=c++11 -Wall
 
 all: game_set game
 
-game_set: main_set.o card.o
-	$(CXX) $(CXXFLAGS) -o game_set main_set.o card.o
+game_set: main_set.cpp card.cpp
+	$(CC) $(CFLAGS) -o game_set main_set.cpp card.cpp
 
-game: main.o card.o card_list.o
-	$(CXX) $(CXXFLAGS) -o game main.o card.o card_list.o
+game: main.cpp card_list.cpp card.cpp
+	$(CC) $(CFLAGS) -o game main.cpp card_list.cpp card.cpp
 
-tests: tests.o card.o card_list.o
-	$(CXX) $(CXXFLAGS) -o tests tests.o card.o card_list.o
-
-main_set.o: main_set.cpp card.h
-	$(CXX) $(CXXFLAGS) -c main_set.cpp
-
-main.o: main.cpp card.h card_list.h
-	$(CXX) $(CXXFLAGS) -c main.cpp
-
-card.o: card.cpp card.h
-	$(CXX) $(CXXFLAGS) -c card.cpp
-
-card_list.o: card_list.cpp card_list.h
-	$(CXX) $(CXXFLAGS) -c card_list.cpp
-
-tests.o: tests.cpp card.h card_list.h
-	$(CXX) $(CXXFLAGS) -c tests.cpp
+tests: tests.cpp card_list.cpp card.cpp
+	$(CC) $(CFLAGS) -o tests tests.cpp card_list.cpp card.cpp
 
 clean:
-	rm -f *.o game_set game tests
+	rm -f game_set game tests

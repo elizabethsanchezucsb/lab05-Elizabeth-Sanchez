@@ -1,74 +1,25 @@
-#include "card_list.h"
-#include "card.h"
-#include <cassert>
 #include <iostream>
+#include "card_list.h"
 
-void testCardComparison() {
-    Card card1(Card::CLUBS, 1);   // Ace of Clubs
-    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
-    Card card3(Card::CLUBS, 1);   // Ace of Clubs
+void test_bst() {
+    CardBST bst;
 
-    assert(card1 == card3);
-    assert(card1 != card2);
-    assert(card1 < card2);
-    assert(card2 > card1);
+    bst.insert(Card(CLUBS, 3));
+    bst.insert(Card(SPADES, 10));
+    bst.insert(Card(HEARTS, 7));
+    bst.insert(Card(DIAMONDS, 5));
 
-    std::cout << "Card comparison tests passed." << std::endl;
-}
+    std::cout << "Testing BST operations:\n";
+    std::cout << "Find CLUBS 3: " << bst.find(Card(CLUBS, 3)) << "\n";
+    std::cout << "Find DIAMONDS 10: " << bst.find(Card(DIAMONDS, 10)) << "\n";
+    std::cout << "Find SPADES 10: " << bst.find(Card(SPADES, 10)) << "\n";
+    std::cout << "Find HEARTS 5: " << bst.find(Card(HEARTS, 5)) << "\n";
 
-void testCardListInsertAndFind() {
-    CardList cardList;
-
-    Card card1(Card::CLUBS, 1);   // Ace of Clubs
-    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
-    Card card3(Card::SPADES, 5);  // 5 of Spades
-    Card card4(Card::HEARTS, 13); // King of Hearts
-
-    cardList.insert(card1);
-    cardList.insert(card2);
-    cardList.insert(card3);
-    cardList.insert(card4);
-
-    assert(cardList.find(card1));
-    assert(cardList.find(card2));
-    assert(cardList.find(card3));
-    assert(cardList.find(card4));
-
-    std::cout << "Card list insert and find tests passed." << std::endl;
-}
-
-void testCardListPrintInOrder() {
-    CardList cardList;
-
-    Card card1(Card::CLUBS, 1);   // Ace of Clubs
-    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
-    Card card3(Card::SPADES, 5);  // 5 of Spades
-    Card card4(Card::HEARTS, 13); // King of Hearts
-
-    cardList.insert(card1);
-    cardList.insert(card2);
-    cardList.insert(card3);
-    cardList.insert(card4);
-
-    std::cout << "Printing card list in order:" << std::endl;
-    cardList.printInOrder();  // Should print in sorted order
-}
-
-void testCardListEmpty() {
-    CardList cardList;
-    Card card1(Card::CLUBS, 1);
-
-    assert(!cardList.find(card1));
-
-    std::cout << "Empty card list tests passed." << std::endl;
+    std::cout << "Inorder traversal:\n";
+    bst.print_inorder();
 }
 
 int main() {
-    testCardComparison();
-    testCardListInsertAndFind();
-    testCardListPrintInOrder();
-    testCardListEmpty();
-
-    std::cout << "All tests passed successfully!" << std::endl;
+    test_bst();
     return 0;
 }

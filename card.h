@@ -17,6 +17,14 @@ public:
     // Overload comparison operators
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
+    bool operator>(const Card& other) const {
+        // Example comparison logic: compare by rank first, then by suit
+         if (suit == other.suit) {
+        return value > other.value;
+    }
+    return suit > other.suit;
+
+    }
 };
 
 #endif // CARD_H

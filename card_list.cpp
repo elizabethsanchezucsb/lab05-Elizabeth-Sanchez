@@ -24,7 +24,7 @@ Node* CardList::insert(Node* node, const Card& card) {
 
     if (card < node->data) {
         node->left = insert(node->left, card);
-    } else if (node->data < card) {
+    } else if (card > node->data) {
         node->right = insert(node->right, card);
     }
 
@@ -67,7 +67,6 @@ Node* CardList::deleteNode(Node* node, const Card& card) {
 
     return node;
 }
-
 bool CardList::contains(const Card& card) const {
     return find(root, card) != nullptr;
 }
@@ -107,9 +106,7 @@ Card CardList::successor(const Card& card) const {
     }
 
     return successor->data;
-}
-
-Card CardList::predecessor(const Card& card) const {
+}Card CardList::predecessor(const Card& card) const {
     Node* current = root;
     Node* predecessor = nullptr;
 
@@ -121,10 +118,7 @@ Card CardList::predecessor(const Card& card) const {
             current = current->left;
         } else {
             if (current->left) {
-                predecessor = current->left;
-                while (predecessor->right) {
-                    predecessor = predecessor->right;
-                }
+                predecessor = findMax(current->left);
             }
             break;
         }
@@ -135,4 +129,10 @@ Card CardList::predecessor(const Card& card) const {
     }
 
     return predecessor->data;
+}
+Node* CardList::findMax(Node* node) const {
+    while (node->right) {
+        node = node->right;
+    }
+    return node;
 }

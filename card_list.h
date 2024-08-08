@@ -21,6 +21,7 @@ private:
     Node* findMin(Node* node) const;
     Node* deleteNode(Node* node, const Card& card);
     Node* find(Node* node, const Card& card) const;
+    Node* findMax(Node* node) const;
 
 public:
     CardList() : root(nullptr) {}

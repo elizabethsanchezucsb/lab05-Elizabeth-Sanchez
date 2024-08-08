@@ -5,15 +5,16 @@
 
 class Card {
 private:
-    std::string suit;
-    std::string value;
+    char suit;
+    int value;
 
 public:
-    Card(const std::string& suit = "", const std::string& value = "");
+    Card(char s, int v);
+    char getSuit() const;
+    int getValue() const;
+    std::string toString() const;
 
-    std::string getSuit() const;
-    std::string getValue() const;
-
+    // Overload comparison operators
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
 };

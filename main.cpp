@@ -1,53 +1,72 @@
 #include <iostream>
 #include <fstream>
-#include "card_list.h"
+#include <string>
 #include "card.h"
+#include "card_list.h"
 
-void printCard(const Card& card) {
-    std::cout << card.getSuit() << " " << card.getValue() << std::endl;
-}
+void playGame(CardList& player1, CardList& player2) {
+    while (true) {
+        Card p1Card = player1.successor(Card('A', 0));  // Get the smallest card
+        Card p2Card = player2.successor(Card('A', 0));
 
-void processCardList(const std::string& filename, CardList& cardList) {
-    std::ifstream file(filename);
-    std::string suit;
-    std::string value;
+        std::cout << "Alice plays " << p1Card.toString() << ". Bob plays " << p2Card.toString() << ". ";
 
-    while (file >> suit >> value) {
-        Card card(suit, value);
-        cardList.addCard(card);
-    }
-}
+        player1.remove(p1Card);
+        player2.remove(p2Card);
 
-int main() {
-    CardList aliceCards;
-    CardList bobCards;
+        if (p1Card.getValue() > p2Card.getValue()) {
+            std::cout << "Alice wins the round." << std::endl;
+            player1.insert(p1Card);
+            player1.insert(p2Card);
+        } else if (p2Card.getValue() > p1Card.getValue()) {
+            std::cout << "Bob wins the round." << std::endl;
+            player2.insert(p1Card);
+            player2.insert(p2Card);
+        } else {
+            std::cout << "Tie. Cards discarded." << std::endl;
+        }
 
-    processCardList("alice.txt", aliceCards);
-    processCardList("bob.txt", bobCards);
-
-    std::cout << "Alice's cards:" << std::endl;
-    aliceCards.inOrderTraversal(printCard);
-
-    std::cout << "Bob's cards:" << std::endl;
-    bobCards.inOrderTraversal(printCard);
-
-    std::cout << "Matching cards:" << std::endl;
-
-    // To store cards that are in both lists
-    std::set<Card> matchingCards;
-
-    // Iterate through Alice's cards and check if they are in Bob's card list
-    aliceCards.inOrderTraversal([&](const Card& aliceCard) {
-        bobCards.inOrderTraversal([&](const Card& bobCard) {
-            if (aliceCard == bobCard) {
-                matchingCards.insert(aliceCard);
+        // Check if either player has run out of cards
+        if (!player1.contains(player1.successor(Card('A', 0)))) {
+            if (!player2.contains(player2.successor(Card('A', 0)))) {
+                std::cout << "Tie game!" << std::endl;
+            } else {
+                std::cout << "Bob wins!" << std::endl;
             }
-        });
-    });
-
-    for (const auto& card : matchingCards) {
-        std::cout << "Matching card: " << card.getSuit() << " " << card.getValue() << std::endl;
+            break;
+        } else if (!player2.contains(player2.successor(Card('A', 0)))) {
+            std::cout << "Alice wins!" << std::endl;
+            break;
+        }
     }
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cerr << "Usage: " << argv[0] << " <player1_file> <player2_file>" << std::endl;
+        return 1;
+    }
+
+    CardList player1, player2;
+    std::ifstream file1(argv[1]), file2(argv[2]);
+
+    if (!file1 || !file2) {
+        std::cerr << "Error opening input files." << std::endl;
+        return 1;
+    }
+
+    char suit;
+    int value;
+
+    while (file1 >> value >> suit) {
+        player1.insert(Card(suit, value));
+    }
+
+    while (file2 >> value >> suit) {
+        player2.insert(Card(suit, value));
+    }
+
+    playGame(player1, player2);
 
     return 0;
 }

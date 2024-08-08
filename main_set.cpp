@@ -1,72 +1,67 @@
 #include <iostream>
 #include <fstream>
 #include <set>
+#include <string>
 #include "card.h"
 
-using namespace std;
+void playGame(std::set<Card>& player1, std::set<Card>& player2) {
+    while (!player1.empty() && !player2.empty()) {
+        Card p1Card = *player1.begin();
+        Card p2Card = *player2.begin();
 
-void read_cards(ifstream& file, set<Card>& cards) {
-    char suit;
-    string value;
-    while (file >> suit >> value) {
-        cards.insert(Card(suit, value));
-    }
-}
+        std::cout << "Alice plays " << p1Card.toString() << ". Bob plays " << p2Card.toString() << ". ";
 
-void play_game(set<Card>& alice, set<Card>& bob) {
-    auto alice_it = alice.begin();
-    while (alice_it != alice.end()) {
-        if (bob.find(*alice_it) != bob.end()) {
-            cout << "Alice picked matching card " << *alice_it << endl;
-            bob.erase(*alice_it);
-            alice_it = alice.erase(alice_it);
+        player1.erase(player1.begin());
+        player2.erase(player2.begin());
+
+        if (p1Card.getValue() > p2Card.getValue()) {
+            std::cout << "Alice wins the round." << std::endl;
+            player1.insert(p1Card);
+            player1.insert(p2Card);
+        } else if (p2Card.getValue() > p1Card.getValue()) {
+            std::cout << "Bob wins the round." << std::endl;
+            player2.insert(p1Card);
+            player2.insert(p2Card);
         } else {
-            ++alice_it;
+            std::cout << "Tie. Cards discarded." << std::endl;
         }
     }
 
-    auto bob_it = bob.rbegin();
-    while (bob_it != bob.rend()) {
-        if (alice.find(*bob_it) != alice.end()) {
-            cout << "Bob picked matching card " << *bob_it << endl;
-            alice.erase(*bob_it);
-            auto to_erase = next(bob_it).base();
-            bob_it = make_reverse_iterator(bob.erase(to_erase));
-        } else {
-            ++bob_it;
-        }
-    }
-
-    cout << "Alice's cards:" << endl;
-    for (const auto& card : alice) {
-        cout << card << endl;
-    }
-
-    cout << "Bob's cards:" << endl;
-    for (const auto& card : bob) {
-        cout << card << endl;
+    if (player1.empty() && player2.empty()) {
+        std::cout << "Tie game!" << std::endl;
+    } else if (player1.empty()) {
+        std::cout << "Bob wins!" << std::endl;
+    } else {
+        std::cout << "Alice wins!" << std::endl;
     }
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << endl;
+        std::cerr << "Usage: " << argv[0] << " <player1_file> <player2_file>" << std::endl;
         return 1;
     }
 
-    ifstream alice_file(argv[1]);
-    ifstream bob_file(argv[2]);
+    std::set<Card> player1, player2;
+    std::ifstream file1(argv[1]), file2(argv[2]);
 
-    if (!alice_file.is_open() || !bob_file.is_open()) {
-        cerr << "Error opening files." << endl;
+    if (!file1 || !file2) {
+        std::cerr << "Error opening input files." << std::endl;
         return 1;
     }
 
-    set<Card> alice_cards, bob_cards;
-    read_cards(alice_file, alice_cards);
-    read_cards(bob_file, bob_cards);
+    char suit;
+    int value;
 
-    play_game(alice_cards, bob_cards);
+    while (file1 >> value >> suit) {
+        player1.insert(Card(suit, value));
+    }
+
+    while (file2 >> value >> suit) {
+        player2.insert(Card(suit, value));
+    }
+
+    playGame(player1, player2);
 
     return 0;
 }

@@ -1,56 +1,52 @@
 #include <iostream>
 #include <cassert>
-#include "card_list.h"
 #include "card.h"
+#include "card_list.h"
 
-// Test helper function to verify card list contents
-void verifyCardList(CardList& cardList, const std::vector<Card>& expectedCards) {
-    std::vector<Card> actualCards;
-    cardList.inOrderTraversal([&](const Card& card) {
-        actualCards.push_back(card);
-    });
+void testCardClass() {
+    Card c1('H', 10);
+    Card c2('S', 5);
+    Card c3('H', 10);
 
-    assert(actualCards.size() == expectedCards.size() && "Card list sizes do not match!");
+    assert(c1.getSuit() == 'H');
+    assert(c1.getValue() == 10);
+    assert(c1.toString() == "10H");
 
-    for (size_t i = 0; i < expectedCards.size(); ++i) {
-        assert(actualCards[i] == expectedCards[i] && "Card lists do not match!");
-    }
+    assert(c2 < c1);
+    assert(c1 == c3);
+    assert(!(c1 < c3) && !(c3 < c1));
+
+    std::cout << "Card class tests passed." << std::endl;
 }
 
-void testCardList() {
-    CardList cardList;
-    cardList.addCard(Card("c", "2"));
-    cardList.addCard(Card("d", "3"));
-    cardList.addCard(Card("s", "4"));
-    cardList.addCard(Card("h", "5"));
+void testCardListInsert() {
+    CardList list;
+    list.insert(Card('H', 5));
+    list.insert(Card('S', 10));
+    list.insert(Card('D', 3));
 
-    std::vector<Card> expectedCards = {
-        Card("c", "2"),
-        Card("d", "3"),
-        Card("h", "5"),
-        Card("s", "4")
-    };
+    assert(list.contains(Card('H', 5)));
+    assert(list.contains(Card('S', 10)));
+    assert(list.contains(Card('D', 3)));
+    assert(!list.contains(Card('C', 7)));
 
-    verifyCardList(cardList, expectedCards);
-
-    std::cout << "CardList test passed!" << std::endl;
+    std::cout << "CardList insert tests passed." << std::endl;
 }
 
-void testCardComparison() {
-    Card card1("c", "2");
-    Card card2("c", "2");
-    Card card3("d", "3");
+void testCardListRemove() {
+    CardList list;
+    list.insert(Card('H', 5));
+    list.insert(Card('S', 10));
+    list.insert(Card('D', 3));
 
-    assert(card1 == card2 && "Card equality test failed!");
-    assert(!(card1 == card3) && "Card inequality test failed!");
+    list.remove(Card('S', 10));
+    assert(!list.contains(Card('S', 10)));
+    assert(list.contains(Card('H', 5)));
+    assert(list.contains(Card('D', 3)));
 
-    std::cout << "Card comparison test passed!" << std::endl;
+    std::cout << "CardList remove tests passed." << std::endl;
 }
 
-int main() {
-    testCardList();
-    testCardComparison();
-
-    std::cout << "All tests passed!" << std::endl;
-    return 0;
-}
+void testCardListSuccessor() {
+    CardList list;
+    

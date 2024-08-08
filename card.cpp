@@ -1,21 +1,29 @@
 #include "card.h"
+#include <sstream>
 
-Card::Card(const std::string& suit, const std::string& value) : suit(suit), value(value) {}
+Card::Card(char s, int v) : suit(s), value(v) {}
 
-std::string Card::getSuit() const {
+char Card::getSuit() const {
     return suit;
 }
 
-std::string Card::getValue() const {
+int Card::getValue() const {
     return value;
 }
 
+std::string Card::toString() const {
+    std::ostringstream oss;
+    oss << value << suit;
+    return oss.str();
+}
+
 bool Card::operator<(const Card& other) const {
-    if (suit < other.suit) return true;
-    if (suit == other.suit && value < other.value) return true;
-    return false;
+    if (suit == other.suit) {
+        return value < other.value;
+    }
+    return suit < other.suit;
 }
 
 bool Card::operator==(const Card& other) const {
-    return suit == other.suit && value == other.value;
+    return (suit == other.suit) && (value == other.value);
 }

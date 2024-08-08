@@ -1,43 +1,31 @@
-# Compiler
 CXX = g++
+CXXFLAGS = -std=c++11 -Wall -g
 
-# Compiler flags
-CXXFLAGS = -std=c++17 -Wall -Wextra
+all: game_set game
 
-# Directories
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
+game_set: main_set.o card.o
+	$(CXX) $(CXXFLAGS) -o game_set main_set.o card.o
 
-# Source files
-SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
-OBJ_FILES = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRC_FILES))
+game: main.o card.o card_list.o
+	$(CXX) $(CXXFLAGS) -o game main.o card.o card_list.o
 
-# Executable names
-EXEC_CARD_LIST = $(BIN_DIR)/test_card_list
-EXEC_STD_SET = $(BIN_DIR)/test_std_set
+tests: tests.o card.o card_list.o
+	$(CXX) $(CXXFLAGS) -o tests tests.o card.o card_list.o
 
-# Targets
-all: $(EXEC_CARD_LIST) $(EXEC_STD_SET)
+main_set.o: main_set.cpp card.h
+	$(CXX) $(CXXFLAGS) -c main_set.cpp
 
-# Build CardList version
-$(EXEC_CARD_LIST): $(OBJ_DIR)/card_list.o $(OBJ_DIR)/main.o
-	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+main.o: main.cpp card.h card_list.h
+	$(CXX) $(CXXFLAGS) -c main.cpp
 
-# Build std::set version
-$(EXEC_STD_SET): $(OBJ_DIR)/main_set.o $(OBJ_DIR)/card.o
-	@mkdir -p $(BIN_DIR)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+card.o: card.cpp card.h
+	$(CXX) $(CXXFLAGS) -c card.cpp
 
-# Build object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(OBJ_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+card_list.o: card_list.cpp card_list.h
+	$(CXX) $(CXXFLAGS) -c card_list.cpp
 
-# Clean up build artifacts
+tests.o: tests.cpp card.h card_list.h
+	$(CXX) $(CXXFLAGS) -c tests.cpp
+
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Phony targets
-.PHONY: all clean
+	rm -f *.o game_set game tests

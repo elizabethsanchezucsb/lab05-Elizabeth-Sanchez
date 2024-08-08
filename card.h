@@ -1,25 +1,22 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include <string>
+#include <iostream>
 
 class Card {
 public:
     enum Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
-    Card(Suit s = CLUBS, int v = 1);
-    
-    Suit getSuit() const;
-    int getValue() const;
-    
-    bool operator<(const Card& other) const;
-    bool operator==(const Card& other) const;
-    bool operator>(const Card& other) const;
-    
-    std::string toString() const;
 
-private:
     Suit suit;
     int value;
+
+    Card(Suit s, int v) : suit(s), value(v) {}
+
+    bool operator==(const Card& other) const;
+    bool operator<(const Card& other) const;
+    bool operator>(const Card& other) const;
 };
+
+std::ostream& operator<<(std::ostream& os, const Card& card);
 
 #endif // CARD_H

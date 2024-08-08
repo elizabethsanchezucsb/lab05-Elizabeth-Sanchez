@@ -1,70 +1,74 @@
-#include <iostream>
-#include <fstream>
-#include <set>
-#include "card.h"
-
-// Define this to switch between CardList and std::set implementations
-#define USE_CARD_LIST
-
-#ifdef USE_CARD_LIST
 #include "card_list.h"
-typedef CardList CardContainer;
-void loadCardsFromFile(const std::string& filename, CardContainer& container) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Unable to open file " << filename << std::endl;
-        return;
-    }
+#include "card.h"
+#include <cassert>
+#include <iostream>
 
-    Card card;
-    while (file >> card) { // Assuming Card overloads the >> operator
-        container.addCard(card);
-    }
+void testCardComparison() {
+    Card card1(Card::CLUBS, 1);   // Ace of Clubs
+    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
+    Card card3(Card::CLUBS, 1);   // Ace of Clubs
 
-    file.close();
+    assert(card1 == card3);
+    assert(card1 != card2);
+    assert(card1 < card2);
+    assert(card2 > card1);
+
+    std::cout << "Card comparison tests passed." << std::endl;
 }
-#else
-typedef std::set<Card> CardContainer;
-void loadCardsFromFile(const std::string& filename, CardContainer& container) {
-    std::ifstream file(filename);
-    if (!file.is_open()) {
-        std::cerr << "Unable to open file " << filename << std::endl;
-        return;
-    }
 
-    Card card;
-    while (file >> card) { // Assuming Card overloads the >> operator
-        container.insert(card);
-    }
+void testCardListInsertAndFind() {
+    CardList cardList;
 
-    file.close();
+    Card card1(Card::CLUBS, 1);   // Ace of Clubs
+    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
+    Card card3(Card::SPADES, 5);  // 5 of Spades
+    Card card4(Card::HEARTS, 13); // King of Hearts
+
+    cardList.insert(card1);
+    cardList.insert(card2);
+    cardList.insert(card3);
+    cardList.insert(card4);
+
+    assert(cardList.find(card1));
+    assert(cardList.find(card2));
+    assert(cardList.find(card3));
+    assert(cardList.find(card4));
+
+    std::cout << "Card list insert and find tests passed." << std::endl;
 }
-#endif
 
-void playGame(CardContainer& aliceCards, CardContainer& bobCards) {
-    // Implement your game logic here for both CardList and std::set
-    // For example, finding common cards between aliceCards and bobCards
-    std::cout << "Playing the game..." << std::endl;
+void testCardListPrintInOrder() {
+    CardList cardList;
 
-    // Example logic for demonstration purposes
-    // Adjust according to the specific game rules
-    for (const auto& card : aliceCards) {
-        if (bobCards.find(card) != bobCards.end()) {
-            std::cout << "Matching card: " << card << std::endl; // Adjust based on how Card is printed
-        }
-    }
+    Card card1(Card::CLUBS, 1);   // Ace of Clubs
+    Card card2(Card::DIAMONDS, 11); // Jack of Diamonds
+    Card card3(Card::SPADES, 5);  // 5 of Spades
+    Card card4(Card::HEARTS, 13); // King of Hearts
+
+    cardList.insert(card1);
+    cardList.insert(card2);
+    cardList.insert(card3);
+    cardList.insert(card4);
+
+    std::cout << "Printing card list in order:" << std::endl;
+    cardList.printInOrder();  // Should print in sorted order
+}
+
+void testCardListEmpty() {
+    CardList cardList;
+    Card card1(Card::CLUBS, 1);
+
+    assert(!cardList.find(card1));
+
+    std::cout << "Empty card list tests passed." << std::endl;
 }
 
 int main() {
-    CardContainer aliceCards;
-    CardContainer bobCards;
+    testCardComparison();
+    testCardListInsertAndFind();
+    testCardListPrintInOrder();
+    testCardListEmpty();
 
-    // Load cards from files
-    loadCardsFromFile("alice_cards.txt", aliceCards);
-    loadCardsFromFile("bob_cards.txt", bobCards);
-
-    // Play the game
-    playGame(aliceCards, bobCards);
-
+    std::cout << "All tests passed successfully!" << std::endl;
     return 0;
 }

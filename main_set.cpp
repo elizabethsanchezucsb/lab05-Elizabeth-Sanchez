@@ -1,85 +1,55 @@
 #include <iostream>
 #include <fstream>
 #include <set>
-#include "card.h"
+#include <string>
 
-void playGame(std::set<Card>& aliceCards, std::set<Card>& bobCards);
+// Assuming Suit enum is defined somewhere
+enum Suit {
+    CLUBS,
+    DIAMONDS,
+    SPADES,
+    HEARTS
+};
 
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
-        return 1;
+std::istream& operator>>(std::istream& in, Suit& suit) {
+    std::string str;
+    in >> str;
+
+    if (str == "CLUBS") suit = CLUBS;
+    else if (str == "DIAMONDS") suit = DIAMONDS;
+    else if (str == "SPADES") suit = SPADES;
+    else if (str == "HEARTS") suit = HEARTS;
+    else in.setstate(std::ios::failbit);
+
+    return in;
+}
+
+struct Card {
+    Suit suit;
+    int value;
+    // Define the necessary comparison operators for set to work correctly.
+    bool operator<(const Card& other) const {
+        return (suit < other.suit) || (suit == other.suit && value < other.value);
     }
+};
 
-    std::set<Card> aliceCards;
-    std::set<Card> bobCards;
+void loadCardsFromFile(const std::string& filename, std::set<Card>& cardSet) {
+    std::ifstream file(filename);
+    Suit suit;
+    int value;
 
-    std::ifstream aliceFile(argv[1]);
-    std::ifstream bobFile(argv[2]);
-
-    if (!aliceFile || !bobFile) {
-        std::cerr << "Error opening input files." << std::endl;
-        return 1;
+    while (file >> suit >> value) {
+        cardSet.insert(Card{suit, value});
     }
+}
 
-    char suit;
-    std::string value;
-    while (aliceFile >> suit >> value) {
-        Card::Suit cardSuit;
-        if (suit == 'c') cardSuit = Card::CLUBS;
-        else if (suit == 'd') cardSuit = Card::DIAMONDS;
-        else if (suit == 's') cardSuit = Card::SPADES;
-        else if (suit == 'h') cardSuit = Card::HEARTS;
+int main() {
+    std::set<Card> cardSet;
+    loadCardsFromFile("cards.txt", cardSet);
 
-        int cardValue;
-        if (value == "a") cardValue = 1;
-        else if (value == "j") cardValue = 11;
-        else if (value == "q") cardValue = 12;
-        else if (value == "k") cardValue = 13;
-        else cardValue = std::stoi(value);
-
-        aliceCards.insert(Card(cardSuit, cardValue));
+    for (const auto& card : cardSet) {
+        std::cout << card.suit << " " << card.value << std::endl;
     }
-
-    while (bobFile >> suit >> value) {
-        Card::Suit cardSuit;
-        if (suit == 'c') cardSuit = Card::CLUBS;
-        else if (suit == 'd') cardSuit = Card::DIAMONDS;
-        else if (suit == 's') cardSuit = Card::SPADES;
-        else if (suit == 'h') cardSuit = Card::HEARTS;
-
-        int cardValue;
-        if (value == "a") cardValue = 1;
-        else if (value == "j") cardValue = 11;
-        else if (value == "q") cardValue = 12;
-        else if (value == "k") cardValue = 13;
-        else cardValue = std::stoi(value);
-
-        bobCards.insert(Card(cardSuit, cardValue));
-    }
-
-    playGame(aliceCards, bobCards);
 
     return 0;
 }
-
- 
-void playGame(std::set<Card>& aliceCards, std::set<Card>& bobCards) {
-    std::cout << "Alice's cards:" << std::endl;
-    for (const auto& card : aliceCards) {
-        std::cout << card.toString() << std::endl;
-    }
-    
-    std::cout << "Bob's cards:" << std::endl;
-    for (const auto& card : bobCards) {
-        std::cout << card.toString() << std::endl;
-    }
-
-    std::cout << "Matching cards:" << std::endl;
-    for (const auto& card : aliceCards) {
-        if (bobCards.find(card) != bobCards.end()) {
-            std::cout << card.toString() << std::endl;
-        }
-    }
-}
-

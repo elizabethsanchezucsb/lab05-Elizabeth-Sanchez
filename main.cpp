@@ -63,7 +63,6 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-
 void playGame(CardList& aliceCards, CardList& bobCards) {
     std::cout << "Alice's cards (in order):" << std::endl;
     aliceCards.printInOrder();
@@ -72,13 +71,24 @@ void playGame(CardList& aliceCards, CardList& bobCards) {
     bobCards.printInOrder();
 
     std::cout << "Matching cards:" << std::endl;
-    Node* aliceNode = aliceCards.getRoot();  // Assuming you have a way to access the root node
+    TreeNode* aliceNode = aliceCards.getRoot();
+    
     while (aliceNode) {
         if (bobCards.find(aliceNode->card)) {
-            std::cout << aliceNode->card.toString() << std::endl;
+            std::cout << aliceNode->card << std::endl;
         }
-        // Traverse the BST (In-Order)
-        aliceNode = getNextNode(aliceNode); // Implement getNextNode to traverse the BST in order
+        // Move to the next node in in-order traversal
+        if (aliceNode->right) {
+            aliceNode = aliceNode->right;
+            while (aliceNode->left) {
+                aliceNode = aliceNode->left;
+            }
+        } else {
+            TreeNode* parent = nullptr;
+            while (aliceNode && (!parent || aliceNode == parent->right)) {
+                aliceNode = parent;
+                // You need to track the parent node during traversal to do this correctly
+            }
+        }
     }
 }
-

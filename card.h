@@ -1,24 +1,21 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include <iostream>
 #include <string>
 
-using namespace std;
-
 class Card {
-public:
-    char suit;  // c, d, s, h
-    string value;  // a, 2, 3, ..., 10, j, q, k
+private:
+    std::string suit;
+    std::string value;
 
-    Card();
-    Card(char s, const string& v);
+public:
+    Card(const std::string& suit = "", const std::string& value = "");
+
+    std::string getSuit() const;
+    std::string getValue() const;
 
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
-    bool operator>(const Card& other) const;
-
-    friend ostream& operator<<(ostream& os, const Card& card);
 };
 
 #endif // CARD_H

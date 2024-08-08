@@ -1,52 +1,70 @@
 #include <iostream>
-#include <cassert>
+#include <fstream>
+#include <set>
 #include "card.h"
+
+// Define this to switch between CardList and std::set implementations
+#define USE_CARD_LIST
+
+#ifdef USE_CARD_LIST
 #include "card_list.h"
+typedef CardList CardContainer;
+void loadCardsFromFile(const std::string& filename, CardContainer& container) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return;
+    }
 
-void testCardClass() {
-    Card c1('H', 10);
-    Card c2('S', 5);
-    Card c3('H', 10);
+    Card card;
+    while (file >> card) { // Assuming Card overloads the >> operator
+        container.addCard(card);
+    }
 
-    assert(c1.getSuit() == 'H');
-    assert(c1.getValue() == 10);
-    assert(c1.toString() == "10H");
+    file.close();
+}
+#else
+typedef std::set<Card> CardContainer;
+void loadCardsFromFile(const std::string& filename, CardContainer& container) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Unable to open file " << filename << std::endl;
+        return;
+    }
 
-    assert(c2 < c1);
-    assert(c1 == c3);
-    assert(!(c1 < c3) && !(c3 < c1));
+    Card card;
+    while (file >> card) { // Assuming Card overloads the >> operator
+        container.insert(card);
+    }
 
-    std::cout << "Card class tests passed." << std::endl;
+    file.close();
+}
+#endif
+
+void playGame(CardContainer& aliceCards, CardContainer& bobCards) {
+    // Implement your game logic here for both CardList and std::set
+    // For example, finding common cards between aliceCards and bobCards
+    std::cout << "Playing the game..." << std::endl;
+
+    // Example logic for demonstration purposes
+    // Adjust according to the specific game rules
+    for (const auto& card : aliceCards) {
+        if (bobCards.find(card) != bobCards.end()) {
+            std::cout << "Matching card: " << card << std::endl; // Adjust based on how Card is printed
+        }
+    }
 }
 
-void testCardListInsert() {
-    CardList list;
-    list.insert(Card('H', 5));
-    list.insert(Card('S', 10));
-    list.insert(Card('D', 3));
+int main() {
+    CardContainer aliceCards;
+    CardContainer bobCards;
 
-    assert(list.contains(Card('H', 5)));
-    assert(list.contains(Card('S', 10)));
-    assert(list.contains(Card('D', 3)));
-    assert(!list.contains(Card('C', 7)));
+    // Load cards from files
+    loadCardsFromFile("alice_cards.txt", aliceCards);
+    loadCardsFromFile("bob_cards.txt", bobCards);
 
-    std::cout << "CardList insert tests passed." << std::endl;
-}
+    // Play the game
+    playGame(aliceCards, bobCards);
 
-void testCardListRemove() {
-    CardList list;
-    list.insert(Card('H', 5));
-    list.insert(Card('S', 10));
-    list.insert(Card('D', 3));
-
-    list.remove(Card('S', 10));
-    assert(!list.contains(Card('S', 10)));
-    assert(list.contains(Card('H', 5)));
-    assert(list.contains(Card('D', 3)));
-
-    std::cout << "CardList remove tests passed." << std::endl;
-}
-
-void testCardListSuccessor() {
-    CardList list;
+    return 0;
 }

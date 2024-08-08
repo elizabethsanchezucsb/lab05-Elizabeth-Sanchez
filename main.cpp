@@ -1,72 +1,84 @@
 #include <iostream>
 #include <fstream>
-#include <string>
-#include "card.h"
 #include "card_list.h"
+#include "card.h"
 
-void playGame(CardList& player1, CardList& player2) {
-    while (true) {
-        Card p1Card = player1.successor(Card('A', 0));  // Get the smallest card
-        Card p2Card = player2.successor(Card('A', 0));
-
-        std::cout << "Alice plays " << p1Card.toString() << ". Bob plays " << p2Card.toString() << ". ";
-
-        player1.remove(p1Card);
-        player2.remove(p2Card);
-
-        if (p1Card.getValue() > p2Card.getValue()) {
-            std::cout << "Alice wins the round." << std::endl;
-            player1.insert(p1Card);
-            player1.insert(p2Card);
-        } else if (p2Card.getValue() > p1Card.getValue()) {
-            std::cout << "Bob wins the round." << std::endl;
-            player2.insert(p1Card);
-            player2.insert(p2Card);
-        } else {
-            std::cout << "Tie. Cards discarded." << std::endl;
-        }
-
-        // Check if either player has run out of cards
-        if (!player1.contains(player1.successor(Card('A', 0)))) {
-            if (!player2.contains(player2.successor(Card('A', 0)))) {
-                std::cout << "Tie game!" << std::endl;
-            } else {
-                std::cout << "Bob wins!" << std::endl;
-            }
-            break;
-        } else if (!player2.contains(player2.successor(Card('A', 0)))) {
-            std::cout << "Alice wins!" << std::endl;
-            break;
-        }
-    }
-}
+void playGame(CardList& aliceCards, CardList& bobCards);
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <player1_file> <player2_file>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
         return 1;
     }
 
-    CardList player1, player2;
-    std::ifstream file1(argv[1]), file2(argv[2]);
+    CardList aliceCards;
+    CardList bobCards;
 
-    if (!file1 || !file2) {
+    std::ifstream aliceFile(argv[1]);
+    std::ifstream bobFile(argv[2]);
+
+    if (!aliceFile || !bobFile) {
         std::cerr << "Error opening input files." << std::endl;
         return 1;
     }
 
     char suit;
-    int value;
+    std::string value;
+    while (aliceFile >> suit >> value) {
+        Card::Suit cardSuit;
+        if (suit == 'c') cardSuit = Card::CLUBS;
+        else if (suit == 'd') cardSuit = Card::DIAMONDS;
+        else if (suit == 's') cardSuit = Card::SPADES;
+        else if (suit == 'h') cardSuit = Card::HEARTS;
 
-    while (file1 >> value >> suit) {
-        player1.insert(Card(suit, value));
+        int cardValue;
+        if (value == "a") cardValue = 1;
+        else if (value == "j") cardValue = 11;
+        else if (value == "q") cardValue = 12;
+        else if (value == "k") cardValue = 13;
+        else cardValue = std::stoi(value);
+
+        aliceCards.insert(Card(cardSuit, cardValue));
     }
 
-    while (file2 >> value >> suit) {
-        player2.insert(Card(suit, value));
+    while (bobFile >> suit >> value) {
+        Card::Suit cardSuit;
+        if (suit == 'c') cardSuit = Card::CLUBS;
+        else if (suit == 'd') cardSuit = Card::DIAMONDS;
+        else if (suit == 's') cardSuit = Card::SPADES;
+        else if (suit == 'h') cardSuit = Card::HEARTS;
+
+        int cardValue;
+        if (value == "a") cardValue = 1;
+        else if (value == "j") cardValue = 11;
+        else if (value == "q") cardValue = 12;
+        else if (value == "k") cardValue = 13;
+        else cardValue = std::stoi(value);
+
+        bobCards.insert(Card(cardSuit, cardValue));
     }
 
-    playGame(player1, player2);
+    playGame(aliceCards, bobCards);
 
     return 0;
 }
+
+
+void playGame(CardList& aliceCards, CardList& bobCards) {
+    std::cout << "Alice's cards (in order):" << std::endl;
+    aliceCards.printInOrder();
+    
+    std::cout << "Bob's cards (in order):" << std::endl;
+    bobCards.printInOrder();
+
+    std::cout << "Matching cards:" << std::endl;
+    Node* aliceNode = aliceCards.getRoot();  // Assuming you have a way to access the root node
+    while (aliceNode) {
+        if (bobCards.find(aliceNode->card)) {
+            std::cout << aliceNode->card.toString() << std::endl;
+        }
+        // Traverse the BST (In-Order)
+        aliceNode = getNextNode(aliceNode); // Implement getNextNode to traverse the BST in order
+    }
+}
+

@@ -4,27 +4,22 @@
 #include <string>
 
 class Card {
-private:
-    char suit;
-    int value;
-
 public:
-    Card(char s, int v);
-    char getSuit() const;
+    enum Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
+    Card(Suit s = CLUBS, int v = 1);
+    
+    Suit getSuit() const;
     int getValue() const;
-    std::string toString() const;
-
-    // Overload comparison operators
+    
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
-    bool operator>(const Card& other) const {
-        // Example comparison logic: compare by rank first, then by suit
-         if (suit != other.suit) {
-        return value > other.value;
-    }
-    return suit > other.suit;
+    bool operator>(const Card& other) const;
+    
+    std::string toString() const;
 
-    }
+private:
+    Suit suit;
+    int value;
 };
 
 #endif // CARD_H

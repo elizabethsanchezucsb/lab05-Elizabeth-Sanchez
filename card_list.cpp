@@ -1,138 +1,113 @@
 #include "card_list.h"
-#include <stdexcept>
+#include <iostream>
+
+Node::Node(const Card& c) : card(c), left(nullptr), right(nullptr) {}
+
+CardList::CardList() : root(nullptr) {}
 
 CardList::~CardList() {
-    deleteTree(root);
-}
-
-void CardList::deleteTree(Node* node) {
-    if (node) {
-        deleteTree(node->left);
-        deleteTree(node->right);
-        delete node;
-    }
+    destroyTree(root);
 }
 
 void CardList::insert(const Card& card) {
-    root = insert(root, card);
+    insert(root, card);
 }
 
-Node* CardList::insert(Node* node, const Card& card) {
-    if (!node) {
-        return new Node(card);
-    }
-
-    if (card < node->data) {
-        node->left = insert(node->left, card);
-    } else if (card > node->data) {
-        node->right = insert(node->right, card);
-    }
-
-    return node;
+bool CardList::find(const Card& card) const {
+    return find(root, card);
 }
 
 void CardList::remove(const Card& card) {
-    root = deleteNode(root, card);
+    root = remove(root, card);
 }
 
-Node* CardList::findMin(Node* node) const {
-    while (node->left) {
-        node = node->left;
+void CardList::printInOrder() const {
+    printInOrder(root);
+    std::cout << std::endl;
+}
+
+void CardList::printReverseInOrder() const {
+    printReverseInOrder(root);
+    std::cout << std::endl;
+}
+
+void CardList::insert(Node*& node, const Card& card) {
+    if (node == nullptr) {
+        node = new Node(card);
+    } else if (card < node->card) {
+        insert(node->left, card);
+    } else if (card > node->card) {
+        insert(node->right, card);
     }
-    return node;
 }
 
-Node* CardList::deleteNode(Node* node, const Card& card) {
-    if (!node) return nullptr;
-
-    if (card < node->data) {
-        node->left = deleteNode(node->left, card);
-    } else if (node->data < card) {
-        node->right = deleteNode(node->right, card);
-    } else {
-        if (!node->left) {
-            Node* temp = node->right;
-            delete node;
-            return temp;
-        } else if (!node->right) {
-            Node* temp = node->left;
-            delete node;
-            return temp;
-        }
-
-        Node* temp = findMin(node->right);
-        node->data = temp->data;
-        node->right = deleteNode(node->right, temp->data);
-    }
-
-    return node;
-}
-bool CardList::contains(const Card& card) const {
-    return find(root, card) != nullptr;
-}
-
-Node* CardList::find(Node* node, const Card& card) const {
-    if (!node || node->data == card) {
-        return node;
-    }
-
-    if (card < node->data) {
+bool CardList::find(Node* node, const Card& card) const {
+    if (node == nullptr) {
+        return false;
+    } else if (card == node->card) {
+        return true;
+    } else if (card < node->card) {
         return find(node->left, card);
     } else {
         return find(node->right, card);
     }
 }
 
-Card CardList::successor(const Card& card) const {
-    Node* current = root;
-    Node* successor = nullptr;
-
-    while (current) {
-        if (card < current->data) {
-            successor = current;
-            current = current->left;
-        } else if (current->data < card) {
-            current = current->right;
-        } else {
-            if (current->right) {
-                successor = findMin(current->right);
-            }
-            break;
+Node* CardList::remove(Node* node, const Card& card) {
+    if (node == nullptr) {
+        return node;
+    }
+    
+    if (card < node->card) {
+        node->left = remove(node->left, card);
+    } else if (card > node->card) {
+        node->right = remove(node->right, card);
+    } else {
+        if (node->left == nullptr) {
+            Node* temp = node->right;
+            delete node;
+            return temp;
+        } else if (node->right == nullptr) {
+            Node* temp = node->left;
+            delete node;
+            return temp;
         }
-    }
-
-    if (!successor) {
-        throw std::runtime_error("No successor found");
-    }
-
-    return successor->data;
-}Card CardList::predecessor(const Card& card) const {
-    Node* current = root;
-    Node* predecessor = nullptr;
-
-    while (current) {
-        if (current->data < card) {
-            predecessor = current;
-            current = current->right;
-        } else if (card < current->data) {
-            current = current->left;
-        } else {
-            if (current->left) {
-                predecessor = findMax(current->left);
-            }
-            break;
-        }
-    }
-
-    if (!predecessor) {
-        throw std::runtime_error("No predecessor found");
-    }
-
-    return predecessor->data;
-}
-Node* CardList::findMax(Node* node) const {
-    while (node->right) {
-        node = node->right;
+        
+        Node* temp = minValueNode(node->right);
+        node->card = temp->card;
+        node->right = remove(node->right, temp->card);
     }
     return node;
+}
+
+Node* CardList::minValueNode(Node* node) const {
+    Node* current = node;
+    while (current && current->left != nullptr) {
+        current = current->left;
+    }
+    return current;
+}
+
+void CardList::printInOrder(Node* node) const {
+    if (node) {
+        printInOrder(node->left);
+        std::cout << node->card.toString() << std::endl;
+        printInOrder(node->right);
+    }
+}
+
+void CardList::printReverseInOrder(Node* node) const {
+    if (node) {
+        printReverseInOrder(node->right);
+        std::cout << node->card.toString() << std::endl;
+        printReverseInOrder(node->left);
+    }
+}
+
+void CardList::destroyTree(Node* node) {
+    if (node) {
+        destroyTree(node->left);
+        destroyTree(node->right);
+        delete node;
+    }
 }

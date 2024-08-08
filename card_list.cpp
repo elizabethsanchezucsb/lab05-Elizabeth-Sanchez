@@ -23,15 +23,15 @@ void CardBST::insert(const Card& c) {
     insert(root, c);
 }
 
-bool CardBST::find(CardNode* node, const Card& c) const {
-    if (node == nullptr) return false;
-    if (node->data == c) return true;
+CardNode* CardBST::find(CardNode* node, const Card& c) const {
+    if (node == nullptr) return nullptr;
+    if (node->data == c) return node;
     if (c < node->data) return find(node->left, c);
     return find(node->right, c);
 }
 
 bool CardBST::find(const Card& c) const {
-    return find(root, c);
+    return find(root, c) != nullptr;
 }
 
 void CardBST::inorder_print(CardNode* node) const {

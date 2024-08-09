@@ -17,8 +17,8 @@ void playGame(CardList& aliceCards, CardList& bobCards) {
     CardList bobMatches;
 
     // Find matches for Alice
-    for (char suit = 'a'; suit <= 'z'; ++suit) {
-        for (char value = '1'; value <= '9'; ++value) {
+    for (char suit : {'c', 'd', 'h', 's'}) { // Correct suits
+        for (char value : {'2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a'}) { // Correct values
             Card card(suit, value);
             if (aliceCards.find(card) && bobCards.find(card)) {
                 aliceMatches.insert(card);
@@ -28,8 +28,8 @@ void playGame(CardList& aliceCards, CardList& bobCards) {
     }
 
     // Find matches for Bob
-    for (char suit = 'a'; suit <= 'z'; ++suit) {
-        for (char value = '1'; value <= '9'; ++value) {
+    for (char suit : {'c', 'd', 'h', 's'}) { // Correct suits
+        for (char value : {'2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a'}) { // Correct values
             Card card(suit, value);
             if (bobCards.find(card) && aliceCards.find(card)) {
                 bobMatches.insert(card);

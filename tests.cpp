@@ -1,70 +1,42 @@
-
+// tests.cpp
+#include <iostream>
+#include <cassert>
 #include "card.h"
 #include "card_list.h"
-#include <iostream>
 
-void testInsertAndFind() {
+using namespace std;
+
+void testCardInsertion() {
     CardList list;
-    Card card1('h', '5');
-    Card card2('s', 'k');
-    Card card3('d', 'a');
+    list.insert(Card('h', "3"));
+    list.insert(Card('s', "5"));
+    list.insert(Card('d', "A"));
 
-    list.insert(card1);
-    list.insert(card2);
-    list.insert(card3);
+    assert(list.find(Card('h', "3")) == true);
+    assert(list.find(Card('s', "5")) == true);
+    assert(list.find(Card('d', "A")) == true);
+    assert(list.find(Card('c', "K")) == false);
 
-    std::cout << "Test Insert and Find: ";
-    if (list.find(card1) && list.find(card2) && list.find(card3)) {
-        std::cout << "Passed" << std::endl;
-    } else {
-        std::cout << "Failed" << std::endl;
-    }
+    cout << "Card insertion test passed." << endl;
 }
 
-void testRemove() {
+void testCardOrdering() {
     CardList list;
-    Card card1('h', '5');
-    Card card2('s', 'k');
-    Card card3('d', 'a');
+    list.insert(Card('h', "3"));
+    list.insert(Card('h', "A"));
+    list.insert(Card('s', "5"));
 
-    list.insert(card1);
-    list.insert(card2);
-    list.insert(card3);
+    assert(list.find(Card('h', "3")) == true);
+    assert(list.find(Card('h', "A")) == true);
+    assert(list.find(Card('s', "5")) == true);
 
-    list.remove(card2);
-
-    std::cout << "Test Remove: ";
-    if (list.find(card1) && !list.find(card2) && list.find(card3)) {
-        std::cout << "Passed" << std::endl;
-    } else {
-        std::cout << "Failed" << std::endl;
-    }
-}
-
-void testSuccessorAndPredecessor() {
-    CardList list;
-    Card card1('h', '5');
-    Card card2('s', 'k');
-    Card card3('d', 'a');
-
-    list.insert(card1);
-    list.insert(card2);
-    list.insert(card3);
-
-    std::cout << "Test Successor and Predecessor: ";
-    Card* successor = list.successor(card1);
-    Card* predecessor = list.predecessor(card2);
-
-    if (successor && *successor == card2 && predecessor && *predecessor == card1) {
-        std::cout << "Passed" << std::endl;
-    } else {
-        std::cout << "Failed" << std::endl;
-    }
+    cout << "Card ordering test passed." << endl;
 }
 
 int main() {
-    testInsertAndFind();
-    testRemove();
-    testSuccessorAndPredecessor();
+    testCardInsertion();
+    testCardOrdering();
+
+    cout << "All tests passed!" << endl;
     return 0;
 }

@@ -1,69 +1,47 @@
-
-#include "card.h"
-#include "card_list.h"
+// main.cpp
 #include <iostream>
 #include <fstream>
+#include <string>
+#include "card.h"
+#include "card_list.h"
 
-void readCards(const std::string& filename, CardList& cards) {
-    std::ifstream file(filename);
-    char suit, value;
-    while (file >> suit >> value) {
-        cards.insert(Card(suit, value));
+using namespace std;
+
+int main(int argv, char** argc){
+    if(argv < 3){
+        cout << "Please provide 2 file names" << endl;
+        return 1;
     }
-}
+  
+    ifstream cardFile1(argc[1]);
+    ifstream cardFile2(argc[2]);
+    string line;
 
-void playGame(CardList& aliceCards, CardList& bobCards) {
-    CardList aliceMatches;
-    CardList bobMatches;
-
-    // Find matches for Alice
-    for (char suit : {'c', 'd', 'h', 's'}) { // Correct suits
-        for (char value : {'2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a'}) { // Correct values
-            Card card(suit, value);
-            if (aliceCards.find(card) && bobCards.find(card)) {
-                aliceMatches.insert(card);
-                bobCards.remove(card);
-            }
-        }
-    }
-
-    // Find matches for Bob
-    for (char suit : {'c', 'd', 'h', 's'}) { // Correct suits
-        for (char value : {'2', '3', '4', '5', '6', '7', '8', '9', 't', 'j', 'q', 'k', 'a'}) { // Correct values
-            Card card(suit, value);
-            if (bobCards.find(card) && aliceCards.find(card)) {
-                bobMatches.insert(card);
-                aliceCards.remove(card);
-            }
-        }
-    }
-
-    std::cout << "Alice picked matching cards: ";
-    aliceMatches.print();
-
-    std::cout << "Bob picked matching cards: ";
-    bobMatches.print();
-
-    std::cout << "Alice's remaining cards: ";
-    aliceCards.print();
-
-    std::cout << "Bob's remaining cards: ";
-    bobCards.print();
-}
-
-int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
+    if (cardFile1.fail() || cardFile2.fail()){
+        cout << "Could not open file " << argc[2];
         return 1;
     }
 
     CardList aliceCards;
     CardList bobCards;
 
-    readCards(argv[1], aliceCards);
-    readCards(argv[2], bobCards);
+    // Read each file
+    while (getline(cardFile1, line) && (line.length() > 0)){
+        char suit = line[0];
+        string rank = line.substr(2);
+        aliceCards.insert(Card(suit, rank));
+    }
+    cardFile1.close();
 
-    playGame(aliceCards, bobCards);
+    while (getline(cardFile2, line) && (line.length() > 0)){
+        char suit = line[0];
+        string rank = line.substr(2);
+        bobCards.insert(Card(suit, rank));
+    }
+    cardFile2.close();
+
+    // Game logic
+    // Implement logic to compare cards between aliceCards and bobCards
 
     return 0;
 }

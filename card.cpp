@@ -1,41 +1,27 @@
-
+// card.cpp
 #include "card.h"
-#include <stdexcept>
 
-Card::Card() : suit('0'), value('0') {}
-
-Card::Card(char s, char v) : suit(s), value(v) {}
+Card::Card(char suit, const std::string& value) : suit(suit), value(value) {}
 
 std::string Card::toString() const {
-    return std::string(1, suit) + " " + std::string(1, value);
-}
-
-bool Card::operator==(const Card& other) const {
-    return (suit == other.suit && value == other.value);
-}
-
-bool Card::operator!=(const Card& other) const {
-    return !(*this == other);
+    return std::string(1, suit) + " " + value;
 }
 
 bool Card::operator<(const Card& other) const {
-    if (getValue() == other.getValue()) {
+    if (suit != other.suit) {
         return suit < other.suit;
     }
-    return getValue() < other.getValue();
+    // Convert value to int for comparison, with special cases for face cards
+    auto getValue = [](const std::string& v) {
+        if (v == "a") return 1;
+        if (v == "j") return 11;
+        if (v == "q") return 12;
+        if (v == "k") return 13;
+        return std::stoi(v);
+    };
+    return getValue(value) < getValue(other.value);
 }
 
-bool Card::operator>(const Card& other) const {
-    return other < *this;
-}
-
-int Card::getValue() const {
-    switch(value) {
-        case 'a': return 14;
-        case 'k': return 13;
-        case 'q': return 12;
-        case 'j': return 11;
-        case '1': return 10; // Assuming '1' represents 10
-        default: return value - '0';
-    }
+bool Card::operator==(const Card& other) const {
+    return suit == other.suit && value == other.value;
 }

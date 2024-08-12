@@ -5,20 +5,17 @@
 
 class Card {
 public:
-    enum Suit { Clubs, Diamonds, Hearts, Spades };
-    enum Value { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
+    char suit;
+    std::string rank;
 
-    Card(Suit suit, Value value);
+    Card(char s, const std::string& r) : suit(s), rank(r) {}
 
-    Suit getSuit() const;
-    Value getValue() const;
-
-    // Overload comparison operators
     bool operator<(const Card& other) const;
+    bool operator==(const Card& other) const;
 
 private:
-    Suit suit;
-    Value value;
+    int getSuitValue() const;
+    int getRankValue() const;
 };
 
-#endif // CARD_H
+#endif

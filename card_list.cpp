@@ -1,7 +1,6 @@
 // card_list.cpp
 // Author: Elizabeth sanchez
-// Implementation of the classes defined in card_list.h
-#include "card_list.h"
+// Implementation of the classes defined in card_list.h#include "card_list.h"
 #include <iostream>
 #include "card.h"
 
@@ -21,7 +20,7 @@ void CardBST::insert(Node*& node, const Card& card) {
         node = new Node(card);
     } else if (card < node->data) {
         insert(node->left, card);
-    } else if (node->data < card) {  // Changed this line
+    } else if (card > node->data) {
         insert(node->right, card);
     }
 }
@@ -52,7 +51,7 @@ Node* CardBST::remove(Node* node, const Card& card) {
 
     if (card < node->data) {
         node->left = remove(node->left, card);
-    } else if (node->data < card) {
+    } else if (card > node->data) {
         node->right = remove(node->right, card);
     } else {
         if (!node->left) {

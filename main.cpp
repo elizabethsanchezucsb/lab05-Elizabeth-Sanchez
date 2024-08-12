@@ -18,30 +18,36 @@ void read_cards(ifstream& file, CardBST& cards) {
 bool alice_turn(Node* node, CardBST& bob) {
     if (!node) return false;
 
-     if (alice_turn(node->left, bob)) return true;
+    // Traverse the left subtree
+    if (alice_turn(node->left, bob)) return true;
 
-     if (bob.find(node->data)) {
+    // Check current node
+    if (bob.find(node->data)) {
         cout << "Alice picked matching card " << node->data << endl;
         bob.remove(node->data);
         return true;
     }
 
-     return alice_turn(node->right, bob);
+    // Traverse the right subtree
+    return alice_turn(node->right, bob);
 }
 
 // Helper function for reverse in-order traversal and finding matches for Bob
 bool bob_turn(Node* node, CardBST& alice) {
     if (!node) return false;
 
-     if (bob_turn(node->right, alice)) return true;
+    // Traverse the right subtree
+    if (bob_turn(node->right, alice)) return true;
 
-     if (alice.find(node->data)) {
+    // Check current node
+    if (alice.find(node->data)) {
         cout << "Bob picked matching card " << node->data << endl;
         alice.remove(node->data);
         return true;
     }
 
-     return bob_turn(node->left, alice);
+    // Traverse the left subtree
+    return bob_turn(node->left, alice);
 }
 
 void play_game(CardBST& alice, CardBST& bob) {
@@ -50,12 +56,11 @@ void play_game(CardBST& alice, CardBST& bob) {
         // Alice's turn
         found_match = alice_turn(alice.get_root(), bob);
 
-        // If Alice found a match bob gets a turn
+        // If Alice found a match, Bob gets a turn
         if (found_match) {
             found_match = bob_turn(bob.get_root(), alice);
         }
-    } while (found_match); 
-    // Continues until no matches are found
+    } while (found_match); // Continue until no matches are found
 
     cout << "Alice's cards:" << endl;
     alice.in_order_traversal();
@@ -63,33 +68,26 @@ void play_game(CardBST& alice, CardBST& bob) {
     cout << "Bob's cards:" << endl;
     bob.in_order_traversal();
 }
-int main(int argv, char** argc){
-  if(argv < 3){
-    cout << "Please provide 2 file names" << endl;
-    return 1;
-  }
-  
-  ifstream cardFile1 (argc[1]);
-  ifstream cardFile2 (argc[2]);
-  string line;
 
-  if (cardFile1.fail() || cardFile2.fail() ){
-    cout << "Could not open file " << argc[2];
-    return 1;
-  }
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << endl;
+        return 1;
+    }
 
-  //Read each file
-  while (getline (cardFile1, line) && (line.length() > 0)){
+    ifstream alice_file(argv[1]);
+    ifstream bob_file(argv[2]);
 
-  }
-  cardFile1.close();
+    if (!alice_file.is_open() || !bob_file.is_open()) {
+        cerr << "Error opening files." << endl;
+        return 1;
+    }
 
+    CardBST alice_cards, bob_cards;
+    read_cards(alice_file, alice_cards);
+    read_cards(bob_file, bob_cards);
 
-  while (getline (cardFile2, line) && (line.length() > 0)){
+    play_game(alice_cards, bob_cards);
 
-  }
-  cardFile2.close();
-  
-  
-  return 0;
+    return 0;
 }

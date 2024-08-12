@@ -1,43 +1,31 @@
 
 // card.cpp
 // Author: Elizabeth Sanchez
-// Implementation of the classes defined in card.h
-#include "card.h"
+// Implementation of the classes defined in card.h#include "card.h"
 
-Card::Card(Suit s, Rank r) : suit(s), rank(r) {}
+Card::Card() : suit('c'), value("a") {}
+
+Card::Card(char s, const string& v) : suit(s), value(v) {}
 
 bool Card::operator<(const Card& other) const {
-    if (suit != other.suit) {
-        return static_cast<int>(suit) < static_cast<int>(other.suit);
+    if (suit == other.suit) {
+        return value < other.value;
     }
-    return static_cast<int>(rank) < static_cast<int>(other.rank);
+    return suit < other.suit;
 }
 
 bool Card::operator==(const Card& other) const {
-    return suit == other.suit && rank == other.rank;
+    return suit == other.suit && value == other.value;
 }
 
-Card::Suit Card::getSuit() const { return suit; }
-Card::Rank Card::getRank() const { return rank; }
-
-std::ostream& operator<<(std::ostream& os, const Card& card) {
-    char suitChar;
-    switch (card.suit) {
-        case Card::Suit::CLUBS: suitChar = 'c'; break;
-        case Card::Suit::DIAMONDS: suitChar = 'd'; break;
-        case Card::Suit::SPADES: suitChar = 's'; break;
-        case Card::Suit::HEARTS: suitChar = 'h'; break;
+bool Card::operator>(const Card& other) const {
+    if (suit == other.suit) {
+        return value > other.value;
     }
+    return suit > other.suit;
+}
 
-    std::string rankStr;
-    switch (card.rank) {
-        case Card::Rank::ACE: rankStr = "a"; break;
-        case Card::Rank::JACK: rankStr = "j"; break;
-        case Card::Rank::QUEEN: rankStr = "q"; break;
-        case Card::Rank::KING: rankStr = "k"; break;
-        default: rankStr = std::to_string(static_cast<int>(card.rank));
-    }
-
-    os << suitChar << " " << rankStr;
+ostream& operator<<(ostream& os, const Card& card) {
+    os << card.suit << " " << card.value;
     return os;
 }

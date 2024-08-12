@@ -7,10 +7,10 @@ class BSTNode {
 public:
     Card data;        // The card stored in this node
     BSTNode* left;    // Pointer to the left child
-    BSTNode* right;   // Pointer to the right child
+    BSTNode* right;   // Pointer to the right
 
     // Constructor to initialize a node with a card
-    BSTNode(const Card& card);
+    BSTNode(const Card& card) : data(card), left(nullptr), right(nullptr) {}
 };
 
 class BST {
@@ -29,6 +29,15 @@ private:
     // Helper function to get the minimum card in the BST
     BSTNode* getMin(BSTNode* node) const;
 
+    // Helper function to get the maximum card in the BST
+    BSTNode* getMax(BSTNode* node) const;
+
+    // Helper function to get the successor of a given card
+    BSTNode* getSuccessor(BSTNode* node) const;
+
+    // Helper function to get the predecessor of a given card
+    BSTNode* getPredecessor(BSTNode* node) const;
+
     // Helper function to delete the entire tree
     void clear(BSTNode* node);
 
@@ -42,11 +51,13 @@ public:
 
     // Public methods
     void insert(const Card& card);
-    BSTNode* find(const Card& card) const;
+    bool find(const Card& card) const;
     void remove(const Card& card);
     void printInOrder() const;
-    BSTNode* successor(BSTNode* node) const;
-    BSTNode* predecessor(BSTNode* node) const;
+    Card getMin() const;
+    Card getMax() const;
+    Card getSuccessor(const Card& card) const;
+    Card getPredecessor(const Card& card) const;
 };
 
 #endif // CARD_LIST_H

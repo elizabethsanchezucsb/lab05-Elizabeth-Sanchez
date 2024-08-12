@@ -2,64 +2,52 @@
 #include <fstream>
 #include <set>
 #include <string>
-#include <sstream>
 #include "card.h"
 
-// Function to read cards from a file into a set
-void readCardsFromFile(const std::string& filename, std::set<Card>& cards) {
+// Function to read cards from a file into a std::set
+std::set<Card> readCardsFromFile(const std::string& filename) {
     std::ifstream file(filename);
+    std::set<Card> cardSet;
+    char suitChar;
+    std::string valueStr;
+
     if (!file) {
         std::cerr << "Error opening file: " << filename << std::endl;
-        exit(1);
+        return cardSet;
     }
 
-    std::string suitStr;
-    std::string valueStr;
-    while (file >> suitStr >> valueStr) {
-        Card::Suit suit;
-        Card::Value value;
-        
-        // Convert suit string to enum
-        if (suitStr == "c") suit = Card::CLUBS;
-        else if (suitStr == "d") suit = Card::DIAMONDS;
-        else if (suitStr == "s") suit = Card::SPADES;
-        else if (suitStr == "h") suit = Card::HEARTS;
-        else {
-            std::cerr << "Unknown suit: " << suitStr << std::endl;
-            continue;
+    while (file >> suitChar >> valueStr) {
+        Suit suit;
+        Value value;
+
+        switch (suitChar) {
+            case 'c': suit = Suit::CLUBS; break;
+            case 'd': suit = Suit::DIAMONDS; break;
+            case 's': suit = Suit::SPADES; break;
+            case 'h': suit = Suit::HEARTS; break;
+            default: continue; // Invalid suit character
         }
 
-        // Convert value string to enum
-        if (valueStr == "a") value = Card::ACE;
-        else if (valueStr == "2") value = Card::TWO;
-        else if (valueStr == "3") value = Card::THREE;
-        else if (valueStr == "4") value = Card::FOUR;
-        else if (valueStr == "5") value = Card::FIVE;
-        else if (valueStr == "6") value = Card::SIX;
-        else if (valueStr == "7") value = Card::SEVEN;
-        else if (valueStr == "8") value = Card::EIGHT;
-        else if (valueStr == "9") value = Card::NINE;
-        else if (valueStr == "10") value = Card::TEN;
-        else if (valueStr == "j") value = Card::JACK;
-        else if (valueStr == "q") value = Card::QUEEN;
-        else if (valueStr == "k") value = Card::KING;
-        else {
-            std::cerr << "Unknown value: " << valueStr << std::endl;
-            continue;
-        }
+        if (valueStr == "a") value = Value::ACE;
+        else if (valueStr == "j") value = Value::JACK;
+        else if (valueStr == "q") value = Value::QUEEN;
+        else if (valueStr == "k") value = Value::KING;
+        else value = static_cast<Value>(std::stoi(valueStr));
 
-        cards.insert(Card(suit, value));
+        cardSet.insert(Card(suit, value));
     }
+
+    return cardSet;
 }
 
-// Function to print a set of cards
-void printCardSet(const std::set<Card>& cards) {
+// Function to print the final cards of a player
+void printCards(const std::set<Card>& cards, const std::string& owner) {
+    std::cout << owner << "'s cards:" << std::endl;
     for (const auto& card : cards) {
-        std::cout << card.toString() << std::endl;
+        std::cout << card << std::endl;
     }
 }
 
-// Main function
 int main(int argc, char* argv[]) {
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
@@ -67,52 +55,48 @@ int main(int argc, char* argv[]) {
     }
 
     // Read cards from files
-    std::set<Card> aliceCards;
-    std::set<Card> bobCards;
-    
-    readCardsFromFile(argv[1], aliceCards);
-    readCardsFromFile(argv[2], bobCards);
+    std::set<Card> aliceCards = readCardsFromFile(argv[1]);
+    std::set<Card> bobCards = readCardsFromFile(argv[2]);
 
-    // Game logic
-    std::set<Card> aliceRemaining = aliceCards;
-    std::set<Card> bobRemaining = bobCards;
+    // Create copies for game processing
+    std::set<Card> aliceCardsCopy = aliceCards;
+    std::set<Card> bobCardsCopy = bobCards;
 
-    bool aliceTurn = true;
-    while (!aliceRemaining.empty() && !bobRemaining.empty()) {
-        if (aliceTurn) {
-            // Alice's turn
-            for (auto it = aliceRemaining.begin(); it != aliceRemaining.end(); ) {
-                if (bobRemaining.find(*it) != bobRemaining.end()) {
-                    std::cout << "Alice picked matching card " << it->toString() << std::endl;
-                    bobRemaining.erase(*it);
-                    it = aliceRemaining.erase(it);
-                    break;
-                } else {
-                    ++it;
-                }
-            }
-        } else {
-            // Bob's turn
-            for (auto it = bobRemaining.rbegin(); it != bobRemaining.rend(); ) {
-                if (aliceRemaining.find(*it) != aliceRemaining.end()) {
-                    std::cout << "Bob picked matching card " << it->toString() << std::endl;
-                    aliceRemaining.erase(*it);
-                    it = std::reverse_iterator<std::set<Card>::iterator>(bobRemaining.erase(std::next(it).base()));
-                    break;
-                } else {
-                    ++it;
-                }
+    bool matchFound;
+    do {
+        matchFound = false;
+
+        // Alice's turn
+        for (auto it = aliceCardsCopy.begin(); it != aliceCardsCopy.end();) {
+            if (bobCards.find(*it) != bobCards.end()) {
+                std::cout << "Alice picked matching card " << *it << std::endl;
+                bobCards.erase(*it);
+                it = aliceCardsCopy.erase(it);
+                matchFound = true;
+            } else {
+                ++it;
             }
         }
-        aliceTurn = !aliceTurn;
-    }
+
+        if (!matchFound) break;
+
+        // Bob's turn
+        for (auto it = bobCardsCopy.rbegin(); it != bobCardsCopy.rend();) {
+            if (aliceCards.find(*it) != aliceCards.end()) {
+                std::cout << "Bob picked matching card " << *it << std::endl;
+                aliceCards.erase(*it);
+                it = std::set<Card>::reverse_iterator(bobCardsCopy.erase(std::next(it).base()));
+                matchFound = true;
+            } else {
+                ++it;
+            }
+        }
+
+    } while (matchFound);
 
     // Print final hands
-    std::cout << "\nAlice's cards:" << std::endl;
-    printCardSet(aliceRemaining);
-
-    std::cout << "\nBob's cards:" << std::endl;
-    printCardSet(bobRemaining);
+    printCards(aliceCards, "Alice");
+    printCards(bobCards, "Bob");
 
     return 0;
 }

@@ -1,21 +1,24 @@
 #ifndef CARD_H
 #define CARD_H
 
-#include <string>
+#include <iostream>
 
 class Card {
 public:
-    char suit;
-    std::string rank;
+    enum class Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
+    enum class Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
 
-    Card(char s, const std::string& r) : suit(s), rank(r) {}
-
+    Card(Suit s, Rank r);
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
+    Suit getSuit() const;
+    Rank getRank() const;
+
+    friend std::ostream& operator<<(std::ostream& os, const Card& card);
 
 private:
-    int getSuitValue() const;
-    int getRankValue() const;
+    Suit suit;
+    Rank rank;
 };
 
 #endif

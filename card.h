@@ -5,19 +5,16 @@
 
 class Card {
 public:
-    enum Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
-    enum Value { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
+    enum Suit { Clubs, Diamonds, Hearts, Spades };
+    enum Value { Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King };
 
-    // Constructor
-    Card(Suit s, Value v);
+    Card(Suit suit, Value value);
 
-    // Method to convert card to string
-    std::string toString() const;
+    Suit getSuit() const;
+    Value getValue() const;
 
-    // Comparison operators
+    // Overload comparison operators
     bool operator<(const Card& other) const;
-    bool operator==(const Card& other) const;
-    bool operator>(const Card& other) const;
 
 private:
     Suit suit;

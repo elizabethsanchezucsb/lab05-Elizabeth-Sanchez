@@ -1,3 +1,6 @@
+// card.h
+// Author: Elizabeth Sanchez
+// All class declarations related to defining a single card go here
 #ifndef CARD_H
 #define CARD_H
 

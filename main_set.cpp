@@ -1,111 +1,73 @@
-#include <iostream>
+// Feb 14: This file should implement the game using the std::set container class
+// Do not include card_list.h in this file#include <iostream>
 #include <fstream>
 #include <set>
-#include <string>
 #include "card.h"
 
-enum class GameState {
-    ALICE_TURN,
-    BOB_TURN,
-    GAME_OVER
-};
+using namespace std;
 
-void readCardsFromFile(const std::string& filename, std::set<Card>& cards) {
-    std::ifstream file(filename);
-    char suitChar;
-    std::string rankStr;
-    while (file >> suitChar >> rankStr) {
-        Card::Suit suit;
-        Card::Rank rank;
-
-        switch (suitChar) {
-            case 'c': suit = Card::Suit::CLUBS; break;
-            case 'd': suit = Card::Suit::DIAMONDS; break;
-            case 's': suit = Card::Suit::SPADES; break;
-            case 'h': suit = Card::Suit::HEARTS; break;
-            default: continue; // Invalid suit
-        }
-
-        if (rankStr == "a") rank = Card::Rank::ACE;
-        else if (rankStr == "j") rank = Card::Rank::JACK;
-        else if (rankStr == "q") rank = Card::Rank::QUEEN;
-        else if (rankStr == "k") rank = Card::Rank::KING;
-        else {
-            try {
-                int rankNum = std::stoi(rankStr);
-                if (rankNum >= 2 && rankNum <= 10) {
-                    rank = static_cast<Card::Rank>(rankNum);
-                } else {
-                    continue; // Invalid rank
-                }
-            } catch (std::invalid_argument&) {
-                continue; // Invalid rank
-            }
-        }
-
-        cards.insert(Card(suit, rank));
+void read_cards(ifstream& file, set<Card>& cards) {
+    char suit;
+    string value;
+    while (file >> suit >> value) {
+        cards.insert(Card(suit, value));
     }
 }
 
-void printCards(const std::set<Card>& cards) {
-    for (const auto& card : cards) {
-        std::cout << card << std::endl;
-    }
-}
-
-bool findAndRemoveMatch(std::set<Card>& playerCards, std::set<Card>& opponentCards, const std::string& playerName) {
-    for (auto it = playerCards.begin(); it != playerCards.end(); ++it) {
-        if (opponentCards.find(*it) != opponentCards.end()) {
-            std::cout << playerName << " picked matching card " << *it << std::endl;
-            opponentCards.erase(*it);
-            playerCards.erase(it);
-            return true;
+void play_game(set<Card>& alice, set<Card>& bob) {
+    auto alice_it = alice.begin();
+    while (alice_it != alice.end()) {
+        if (bob.find(*alice_it) != bob.end()) {
+            cout << "Alice picked matching card " << *alice_it << endl;
+            bob.erase(*alice_it);
+            alice_it = alice.erase(alice_it);
+        } else {
+            ++alice_it;
         }
     }
-    return false;
+
+    auto bob_it = bob.rbegin();
+    while (bob_it != bob.rend()) {
+        if (alice.find(*bob_it) != alice.end()) {
+            cout << "Bob picked matching card " << *bob_it << endl;
+            alice.erase(*bob_it);
+            auto to_erase = next(bob_it).base();
+            bob_it = make_reverse_iterator(bob.erase(to_erase));
+        } else {
+            ++bob_it;
+        }
+    }
+
+    cout << "Alice's cards:" << endl;
+    for (const auto& card : alice) {
+        cout << card << endl;
+    }
+
+    cout << "Bob's cards:" << endl;
+    for (const auto& card : bob) {
+        cout << card << endl;
+    }
 }
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " <alice_cards_file> <bob_cards_file>" << std::endl;
+        cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << endl;
         return 1;
     }
 
-    std::set<Card> aliceCards, bobCards;
-    readCardsFromFile(argv[1], aliceCards);
-    readCardsFromFile(argv[2], bobCards);
+    ifstream alice_file(argv[1]);
+    ifstream bob_file(argv[2]);
 
-    GameState currentState = GameState::ALICE_TURN;
-
-    while (currentState != GameState::GAME_OVER) {
-        switch (currentState) {
-            case GameState::ALICE_TURN:
-                if (findAndRemoveMatch(aliceCards, bobCards, "Alice")) {
-                    currentState = GameState::ALICE_TURN;
-                } else {
-                    currentState = GameState::BOB_TURN;
-                }
-                break;
-
-            case GameState::BOB_TURN:
-                if (findAndRemoveMatch(bobCards, aliceCards, "Bob")) {
-                    currentState = GameState::BOB_TURN;
-                } else {
-                    currentState = GameState::GAME_OVER;
-                }
-                break;
-
-            default:
-                currentState = GameState::GAME_OVER;
-                break;
-        }
+    if (!alice_file.is_open() || !bob_file.is_open()) {
+        cerr << "Error opening files." << endl;
+        return 1;
     }
 
-    std::cout << "\nAlice's cards:" << std::endl;
-    printCards(aliceCards);
+    set<Card> alice_cards, bob_cards;
+    read_cards(alice_file, alice_cards);
+    read_cards(bob_file, bob_cards);
 
-    std::cout << "\nBob's cards:" << std::endl;
-    printCards(bobCards);
+    play_game(alice_cards, bob_cards);
 
     return 0;
 }

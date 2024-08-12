@@ -1,155 +1,104 @@
+// card_list.cpp
+// Author: Elizabeth sanchez
+// Implementation of the classes defined in card_list.h
 #include "card_list.h"
 #include <iostream>
+#include "card.h"
 
-BST::BST() : root(nullptr) {}
 
-BST::~BST() {
+CardBST::CardBST() : root(nullptr) {}
+
+CardBST::~CardBST() {
     clear(root);
 }
 
-void BST::insert(BSTNode*& node, const Card& card) {
-    if (node == nullptr) {
-        node = new BSTNode(card);
+void CardBST::insert(const Card& card) {
+    insert(root, card);
+}
+
+void CardBST::insert(Node*& node, const Card& card) {
+    if (!node) {
+        node = new Node(card);
     } else if (card < node->data) {
         insert(node->left, card);
-    } else {
+    } else if (node->data < card) {  // Changed this line
         insert(node->right, card);
     }
 }
 
-void BST::insert(const Card& card) {
-    insert(root, card);
+bool CardBST::find(const Card& card) const {
+    return find(root, card);
 }
 
-BSTNode* BST::find(BSTNode* node, const Card& card) const {
-    if (node == nullptr) return nullptr;
-    if (card == node->data) return node;
-    if (card < node->data) return find(node->left, card);
+bool CardBST::find(Node* node, const Card& card) const {
+    if (!node) {
+        return false;
+    }
+    if (card == node->data) {
+        return true;
+    }
+    if (card < node->data) {
+        return find(node->left, card);
+    }
     return find(node->right, card);
 }
 
-bool BST::find(const Card& card) const {
-    return find(root, card) != nullptr;
+void CardBST::remove(const Card& card) {
+    root = remove(root, card);
 }
 
-void BST::remove(BSTNode*& node, const Card& card) {
-    if (node == nullptr) return;
+Node* CardBST::remove(Node* node, const Card& card) {
+    if (!node) return nullptr;
 
     if (card < node->data) {
-        remove(node->left, card);
+        node->left = remove(node->left, card);
     } else if (node->data < card) {
-        remove(node->right, card);
+        node->right = remove(node->right, card);
     } else {
-        if (node->left == nullptr) {
-            BSTNode* temp = node;
-            node = node->right;
-            delete temp;
-        } else if (node->right == nullptr) {
-            BSTNode* temp = node;
-            node = node->left;
-            delete temp;
+        if (!node->left) {
+            Node* right = node->right;
+            delete node;
+            return right;
+        } else if (!node->right) {
+            Node* left = node->left;
+            delete node;
+            return left;
         } else {
-            BSTNode* temp = getMin(node->right);
-            node->data = temp->data;
-            remove(node->right, temp->data);
+            Node* min_node = find_min(node->right);
+            node->data = min_node->data;
+            node->right = remove(node->right, min_node->data);
         }
     }
-}
-
-void BST::remove(const Card& card) {
-    remove(root, card);
-}
-
-BSTNode* BST::getMin(BSTNode* node) const {
-    while (node && node->left) node = node->left;
     return node;
 }
 
-BSTNode* BST::getMax(BSTNode* node) const {
-    while (node && node->right) node = node->right;
+Node* CardBST::find_min(Node* node) const {
+    while (node->left) {
+        node = node->left;
+    }
     return node;
 }
 
-BSTNode* BST::getSuccessor(BSTNode* node) const {
-    if (node->right != nullptr) {
-        return getMin(node->right);
-    }
-
-    BSTNode* parent = nullptr;
-    BSTNode* current = root;
-    while (current != nullptr) {
-        if (node->data < current->data) {
-            parent = current;
-            current = current->left;
-        } else if (current->data < node->data) {
-            current = current->right;
-        } else {
-            break;
-        }
-    }
-
-    return parent;
+void CardBST::in_order_traversal() const {
+    in_order_traversal(root);
 }
 
-BSTNode* BST::getPredecessor(BSTNode* node) const {
-    if (node->left != nullptr) {
-        return getMax(node->left);
+void CardBST::in_order_traversal(Node* node) const {
+    if (node) {
+        in_order_traversal(node->left);
+        std::cout << node->data << std::endl;
+        in_order_traversal(node->right);
     }
-
-    BSTNode* parent = nullptr;
-    BSTNode* current = root;
-    while (current != nullptr) {
-        if (node->data < current->data) {
-            current = current->left;
-        } else if (current->data < node->data) {
-            parent = current;
-            current = current->right;
-        } else {
-            break;
-        }
-    }
-
-    return parent;
 }
 
-void BST::clear(BSTNode* node) {
-    if (node != nullptr) {
+void CardBST::clear(Node* node) {
+    if (node) {
         clear(node->left);
         clear(node->right);
         delete node;
     }
 }
 
-void BST::printInOrder(BSTNode* node) const {
-    if (node != nullptr) {
-        printInOrder(node->left);
-        std::cout << node->data.toString() << std::endl;
-        printInOrder(node->right);
-    }
-}
-
-void BST::printInOrder() const {
-    printInOrder(root);
-}
-
-Card BST::getMin() const {
-    BSTNode* node = getMin(root);
-    return node ? node->data : Card();
-}
-
-Card BST::getMax() const {
-    BSTNode* node = getMax(root);
-    return node ? node->data : Card();
-}
-
-Card BST::getSuccessor(const Card& card) const {
-    BSTNode* node = find(root, card);
-    BSTNode* succ = getSuccessor(node);
-    return succ ? succ->data : Card();
-}
-
-Card BST::getPredecessor(const Card& card) const {
-    BSTNode* node = find(root, card);
-    BSTNode* pred = getPredecessor(node);
-    return pred ? pred->data : Card();
+Node* CardBST::get_root() const {
+    return root;
 }

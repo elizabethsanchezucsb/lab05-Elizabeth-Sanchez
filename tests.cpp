@@ -1,132 +1,220 @@
+
+#ifndef CARD_LIST_H
+#define CARD_LIST_H
+
+#include "card.h"
+
+class Node {
+public:
+    Card data;
+    Node* left;
+    Node* right;
+
+    Node(const Card& card) : data(card), left(nullptr), right(nullptr) {}
+};
+
+class CardBST {
+public:
+    CardBST();
+    ~CardBST();
+
+    void insert(const Card& card);
+    bool find(const Card& card) const;
+    void remove(const Card& card);
+    void in_order_traversal() const;
+    Node* get_root() const;  // New function to get root node
+
+private:
+    Node* root;
+
+    void insert(Node*& node, const Card& card);
+    bool find(Node* node, const Card& card) const;
+    Node* remove(Node* node, const Card& card);
+    Node* find_min(Node* node) const;
+    void in_order_traversal(Node* node) const;
+    void clear(Node* node);
+};
+
+#endif // CARD_LIST_H
+
+ game
+ Download
+ main.cpp
+ Download
+ main_set.cpp
+ Download
+#include <iostream>
+#include <fstream>
+#include <set>
+#include "card.h"
+
+using namespace std;
+
+void read_cards(ifstream& file, set<Card>& cards) {
+    char suit;
+    string value;
+    while (file >> suit >> value) {
+        cards.insert(Card(suit, value));
+    }
+}
+
+void play_game(set<Card>& alice, set<Card>& bob) {
+    auto alice_it = alice.begin();
+    while (alice_it != alice.end()) {
+        if (bob.find(*alice_it) != bob.end()) {
+            cout << "Alice picked matching card " << *alice_it << endl;
+            bob.erase(*alice_it);
+            alice_it = alice.erase(alice_it);
+        } else {
+            ++alice_it;
+        }
+    }
+
+    auto bob_it = bob.rbegin();
+    while (bob_it != bob.rend()) {
+        if (alice.find(*bob_it) != alice.end()) {
+            cout << "Bob picked matching card " << *bob_it << endl;
+            alice.erase(*bob_it);
+            auto to_erase = next(bob_it).base();
+            bob_it = make_reverse_iterator(bob.erase(to_erase));
+        } else {
+            ++bob_it;
+        }
+    }
+
+    cout << "Alice's cards:" << endl;
+    for (const auto& card : alice) {
+        cout << card << endl;
+    }
+
+    cout << "Bob's cards:" << endl;
+    for (const auto& card : bob) {
+        cout << card << endl;
+    }
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << endl;
+        return 1;
+    }
+
+    ifstream alice_file(argv[1]);
+    ifstream bob_file(argv[2]);
+
+    if (!alice_file.is_open() || !bob_file.is_open()) {
+        cerr << "Error opening files." << endl;
+        return 1;
+    }
+
+    set<Card> alice_cards, bob_cards;
+    read_cards(alice_file, alice_cards);
+    read_cards(bob_file, bob_cards);
+
+    play_game(alice_cards, bob_cards);
+
+    return 0;
+}
+
+ o_0.txt
+ Download
+ o_1.txt
+ Download
+ o_2.txt
+ Download
+ o_3.txt
+ Download
+ tests.cpp
+ Download
 #include <iostream>
 #include <cassert>
+#include "card.h"
 #include "card_list.h"
 
-// Function to test Card comparison operators
-void testCardComparison() {
-    Card c1(Card::CLUBS, 2);
-    Card c2(Card::CLUBS, 3);
-    Card c3(Card::DIAMONDS, 2);
-    Card c4(Card::CLUBS, 2);
-    
-    assert(c1 < c2);   // Clubs 2 should be less than Clubs 3
-    assert(c1 < c3);   // Clubs 2 should be less than Diamonds 2
-    assert(c2 > c1);   // Clubs 3 should be greater than Clubs 2
-    assert(c1 == c4);  // Clubs 2 should be equal to Clubs 2
-    assert(c1 != c2);  // Clubs 2 should not be equal to Clubs 3
+void testInsert() {
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    std::cout << "Card comparison tests passed!" << std::endl;
+    assert(cl.contains(Card("c", "a")));
+    assert(cl.contains(Card("d", "2")));
+    assert(cl.contains(Card("h", "k")));
+    assert(cl.contains(Card("s", "5")));
+
+    std::cout << "testInsert passed." << std::endl;
 }
 
-// Function to print the BST in-order for debugging purposes
-void printTree(const BST& bst) {
-    bst.printInOrder();  // Assumes your BST has a printInOrder method
-}
-
-// Function to test BST insertion
-void testInsertion() {
-    BST bst;
-    bst.insert(Card(Card::HEARTS, 10));
-    bst.insert(Card(Card::SPADES, 5));
-    bst.insert(Card(Card::DIAMONDS, 7));
-    
-    printTree(bst);
-
-    std::cout << "Insertion tests passed!" << std::endl;
-}
-
-// Function to test BST find operation
-void testFind() {
-    BST bst;
-    bst.insert(Card(Card::HEARTS, 10));
-    bst.insert(Card(Card::SPADES, 5));
-    bst.insert(Card(Card::DIAMONDS, 7));
-    
-    assert(bst.find(Card(Card::HEARTS, 10)));  // Should find this card
-    assert(bst.find(Card(Card::SPADES, 5)));   // Should find this card
-    assert(bst.find(Card(Card::DIAMONDS, 7)));  // Should find this card
-    assert(!bst.find(Card(Card::CLUBS, 2)));    // Should not find this card
-
-    std::cout << "Find tests passed!" << std::endl;
-}
-
-// Function to test BST deletion
 void testDelete() {
-    BST bst;
-    bst.insert(Card(Card::HEARTS, 10));
-    bst.insert(Card(Card::SPADES, 5));
-    bst.insert(Card(Card::DIAMONDS, 7));
-    
-    bst.remove(Card(Card::HEARTS, 10));
-    assert(!bst.find(Card(Card::HEARTS, 10)));  // Should not find the removed card
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    printTree(bst);
+    cl.remove(Card("d", "2"));
+    assert(!cl.contains(Card("d", "2")));
 
-    std::cout << "Deletion tests passed!" << std::endl;
+    cl.remove(Card("h", "k"));
+    assert(!cl.contains(Card("h", "k")));
+
+    std::cout << "testDelete passed." << std::endl;
 }
 
-// Function to test BST successor
+void testFind() {
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
+
+    assert(cl.contains(Card("c", "a")));
+    assert(cl.contains(Card("d", "2")));
+    assert(cl.contains(Card("h", "k")));
+    assert(cl.contains(Card("s", "5")));
+    assert(!cl.contains(Card("d", "3")));
+
+    std::cout << "testFind passed." << std::endl;
+}
+
 void testSuccessor() {
-    BST bst;
-    bst.insert(Card(Card::DIAMONDS, 7));
-    bst.insert(Card(Card::SPADES, 5));
-    bst.insert(Card(Card::HEARTS, 10));
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    BSTNode* node = bst.find(Card(Card::SPADES, 5));
-    BSTNode* successor = bst.successor(node);
+    assert(cl.successor(Card("c", "a")) == Card("d", "2"));
+    assert(cl.successor(Card("d", "2")) == Card("s", "5"));
+    assert(cl.successor(Card("s", "5")) == Card("h", "k"));
+    assert(cl.successor(Card("h", "k")).suit == "" && cl.successor(Card("h", "k")).value == "");
 
-    assert(successor && successor->data == Card(Card::DIAMONDS, 7));
-    std::cout << "Successor test passed!" << std::endl;
+    std::cout << "testSuccessor passed." << std::endl;
 }
 
-
-// Function to test BST predecessor
 void testPredecessor() {
-    BST bst;
-    bst.insert(Card(Card::HEARTS, 10));
-    bst.insert(Card(Card::SPADES, 5));
-    bst.insert(Card(Card::DIAMONDS, 7));
-    
-    BSTNode* node = bst.find(Card(Card::DIAMONDS, 7)); // Corrected to not use 'root'
-    BSTNode* predecessor = bst.predecessor(node);
-    assert(predecessor && predecessor->data == Card(Card::SPADES, 5));  // Should find the correct predecessor
+    CardList cl;
+    cl.insert(Card("c", "a"));
+    cl.insert(Card("d", "2"));
+    cl.insert(Card("h", "k"));
+    cl.insert(Card("s", "5"));
 
-    std::cout << "Predecessor tests passed!" << std::endl;
-}
+    assert(cl.predecessor(Card("h", "k")) == Card("s", "5"));
+    assert(cl.predecessor(Card("s", "5")) == Card("d", "2"));
+    assert(cl.predecessor(Card("d", "2")) == Card("c", "a"));
+    assert(cl.predecessor(Card("c", "a")).suit == "" && cl.predecessor(Card("c", "a")).value == "");
 
-// Function to test game logic
-void testGameLogic() {
-    BST aliceCards;
-    BST bobCards;
-
-    // Insert cards for Alice and Bob
-    aliceCards.insert(Card(Card::CLUBS, 2));
-    aliceCards.insert(Card(Card::DIAMONDS, 3));
-    aliceCards.insert(Card(Card::SPADES, 10));
-    
-    bobCards.insert(Card(Card::CLUBS, 2));
-    bobCards.insert(Card(Card::DIAMONDS, 5));
-    bobCards.insert(Card(Card::SPADES, 10));
-
-    // Simulate Alice's turn
-    // Ensure aliceTurn is defined or remove the call if not implemented
-    // bool matchFound = aliceTurn(aliceCards, bobCards);  
-
-    // Check remaining cards
-    // assert(!aliceCards.find(Card(Card::CLUBS, 2))); // Should not find the removed card
-    // assert(!bobCards.find(Card(Card::CLUBS, 2))); // Should not find the removed card
-
-    std::cout << "Game logic tests passed!" << std::endl;
+    std::cout << "testPredecessor passed." << std::endl;
 }
 
 int main() {
-    testCardComparison();
-    testInsertion();
-    testFind();
+    testInsert();
     testDelete();
+    testFind();
     testSuccessor();
     testPredecessor();
-    testGameLogic();
 
+    std::cout << "All tests passed!" << std::endl;
     return 0;
 }

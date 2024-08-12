@@ -1,123 +1,95 @@
+// Feb 14: This file should implement the game using a custom implementation of a BST (that is based on your implementation from lab02)
 #include <iostream>
 #include <fstream>
-#include <set>
 #include "card_list.h"
+#include "card.h"
 
-// Function to read cards from a file into a BST
-BST readCardsFromFile(const std::string& filename) {
-    BST cards;
-    std::ifstream file(filename);
+using namespace std;
 
-    if (file.is_open()) {
-        std::string suitChar;
-        int value;
-        while (file >> suitChar >> value) {
-            Card::Suit suit;
-            if (suitChar == "c") suit = Card::CLUBS;
-            else if (suitChar == "d") suit = Card::DIAMONDS;
-            else if (suitChar == "s") suit = Card::SPADES;
-            else if (suitChar == "h") suit = Card::HEARTS;
-
-            cards.insert(Card(suit, value));
-        }
-        file.close();
-    } else {
-        std::cerr << "Unable to open file: " << filename << std::endl;
+void read_cards(ifstream& file, CardBST& cards) {
+    char suit;
+    string value;
+    while (file >> suit >> value) {
+        cards.insert(Card(suit, value));
     }
-
-    return cards;
 }
 
-// Function to handle Alice's turn
-bool aliceTurn(BST& aliceCards, BST& bobCards) {
-    bool matchFound = false;
+// Helper function for in-order traversal and finding matches for Alice
+bool alice_turn(Node* node, CardBST& bob) {
+    if (!node) return false;
 
-    // Using in-order traversal to iterate through Alice's cards
-    std::set<Card> aliceCardsSet;
-    std::ifstream file("alice_cards.txt");
-    std::string suitChar;
-    int value;
-    while (file >> suitChar >> value) {
-        Card::Suit suit;
-        if (suitChar == "c") suit = Card::CLUBS;
-        else if (suitChar == "d") suit = Card::DIAMONDS;
-        else if (suitChar == "s") suit = Card::SPADES;
-        else if (suitChar == "h") suit = Card::HEARTS;
-        
-        aliceCardsSet.insert(Card(suit, value));
-    }
-    file.close();
+     if (alice_turn(node->left, bob)) return true;
 
-    for (const auto& card : aliceCardsSet) {
-        if (bobCards.find(card)) {
-            std::cout << "Alice picked matching card " << card << std::endl;
-            bobCards.remove(card);  // Remove the card from Bob's hand
-            aliceCards.remove(card);  // Remove the card from Alice's hand
-            matchFound = true;  // A match was found
-        }
+     if (bob.find(node->data)) {
+        cout << "Alice picked matching card " << node->data << endl;
+        bob.remove(node->data);
+        return true;
     }
 
-    return matchFound;
+     return alice_turn(node->right, bob);
 }
 
-// Function to handle Bob's turn
-bool bobTurn(BST& aliceCards, BST& bobCards) {
-    bool matchFound = false;
+// Helper function for reverse in-order traversal and finding matches for Bob
+bool bob_turn(Node* node, CardBST& alice) {
+    if (!node) return false;
 
-    // Using in-order traversal to iterate through Bob's cards in reverse order
-    std::set<Card> bobCardsSet;
-    std::ifstream file("bob_cards.txt");
-    std::string suitChar;
-    int value;
-    while (file >> suitChar >> value) {
-        Card::Suit suit;
-        if (suitChar == "c") suit = Card::CLUBS;
-        else if (suitChar == "d") suit = Card::DIAMONDS;
-        else if (suitChar == "s") suit = Card::SPADES;
-        else if (suitChar == "h") suit = Card::HEARTS;
-        
-        bobCardsSet.insert(Card(suit, value));
-    }
-    file.close();
+     if (bob_turn(node->right, alice)) return true;
 
-    for (auto it = bobCardsSet.rbegin(); it != bobCardsSet.rend(); ++it) {
-        if (aliceCards.find(*it)) {
-            std::cout << "Bob picked matching card " << *it << std::endl;
-            aliceCards.remove(*it);  // Remove the card from Alice's hand
-            bobCards.remove(*it);  // Remove the card from Bob's hand
-            matchFound = true;  // A match was found
-        }
+     if (alice.find(node->data)) {
+        cout << "Bob picked matching card " << node->data << endl;
+        alice.remove(node->data);
+        return true;
     }
 
-    return matchFound;
+     return bob_turn(node->left, alice);
 }
 
-int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        std::cerr << "Usage: " << argv[0] << " <alice_cards.txt> <bob_cards.txt>" << std::endl;
-        return 1;
-    }
+void play_game(CardBST& alice, CardBST& bob) {
+    bool found_match;
+    do {
+        // Alice's turn
+        found_match = alice_turn(alice.get_root(), bob);
 
-    // Read the cards from input files
-    BST aliceCards = readCardsFromFile(argv[1]);
-    BST bobCards = readCardsFromFile(argv[2]);
-
-    bool matchFound = true;
-
-    // The game loop continues as long as matches are found
-while (matchFound) {
-        matchFound = aliceTurn(aliceCards, bobCards);
-        if (matchFound) {
-            matchFound = bobTurn(aliceCards, bobCards);
+        // If Alice found a match bob gets a turn
+        if (found_match) {
+            found_match = bob_turn(bob.get_root(), alice);
         }
-    }
+    } while (found_match); 
+    // Continues until no matches are found
 
-    // Print the final hands of Alice and Bob
-    std::cout << "\nAlice's cards:" << std::endl;
-    aliceCards.printInOrder();
+    cout << "Alice's cards:" << endl;
+    alice.in_order_traversal();
 
-    std::cout << "\nBob's cards:" << std::endl;
-    bobCards.printInOrder();
+    cout << "Bob's cards:" << endl;
+    bob.in_order_traversal();
+}
+int main(int argv, char** argc){
+  if(argv < 3){
+    cout << "Please provide 2 file names" << endl;
+    return 1;
+  }
+  
+  ifstream cardFile1 (argc[1]);
+  ifstream cardFile2 (argc[2]);
+  string line;
 
-    return 0;
-}        
+  if (cardFile1.fail() || cardFile2.fail() ){
+    cout << "Could not open file " << argc[2];
+    return 1;
+  }
+
+  //Read each file
+  while (getline (cardFile1, line) && (line.length() > 0)){
+
+  }
+  cardFile1.close();
+
+
+  while (getline (cardFile2, line) && (line.length() > 0)){
+
+  }
+  cardFile2.close();
+  
+  
+  return 0;
+}

@@ -1,31 +1,21 @@
-
 // card.cpp
-// Author: Elizabeth Sanchez
-// Implementation of the classes defined in card.h#include "card.h"
+// Author: Your name
+// Implementation of the classes defined in card.h
+#include "card.h"
 
-Card::Card() : suit('c'), value("a") {}
-
-Card::Card(char s, const string& v) : suit(s), value(v) {}
+Card::Card(std::string suit, int value) : suit(suit), value(value) {}
 
 bool Card::operator<(const Card& other) const {
-    if (suit == other.suit) {
-        return value < other.value;
+    if (this->value == other.value) {
+        return this->suit < other.suit;
     }
-    return suit < other.suit;
+    return this->value < other.value;
 }
 
 bool Card::operator==(const Card& other) const {
-    return suit == other.suit && value == other.value;
+    return (this->suit == other.suit) && (this->value == other.value);
 }
 
-bool Card::operator>(const Card& other) const {
-    if (suit == other.suit) {
-        return value > other.value;
-    }
-    return suit > other.suit;
-}
-
-ostream& operator<<(ostream& os, const Card& card) {
-    os << card.suit << " " << card.value;
-    return os;
+int Card::getValue() const {
+    return value;
 }

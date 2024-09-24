@@ -1,27 +1,30 @@
 // card.h
-// Author: Elizabeth Sanchez
+// Author: Your name
 // All class declarations related to defining a single card go here
+
 #ifndef CARD_H
 #define CARD_H
+#include <string>
 
-#include <iostream>
+using namespace std;
 
-class Card {
-public:
-    enum class Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
-    enum class Rank { ACE = 1, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, JACK, QUEEN, KING };
-
-    Card(Suit s, Rank r);
+class Card{
+    public:
+    Card(string suit, int value);
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
-    Suit getSuit() const;
-    Rank getRank() const;
+    string suit;
+    int value;
 
-    friend std::ostream& operator<<(std::ostream& os, const Card& card);
+    //constructor to define so default
 
-private:
-    Suit suit;
-    Rank rank;
-};
+    //bool operator<(const Card& other) const{ //other reppresents original Card class
+    //return value < other.value || (value == other.value && suit < other.suit);
+    private:
+    int getValue() const;
+    };
+
+
+
 
 #endif

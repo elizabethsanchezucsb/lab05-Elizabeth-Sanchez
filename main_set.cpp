@@ -83,13 +83,14 @@ int main(int argc, char** argv){
     } while (matchFound);
 
     // Print final hands
-    cout << "\
-Alice's cards:" << endl;
+    cout << endl;
+cout << "Alice's cards:" << endl;
     for (const auto& card : aliceHand) {
         cout << card << endl;
     }
-    cout << "\
-Bob's cards:" << endl;
+    cout << endl;
+
+cout << "Bob's cards:" << endl;
     for (const auto& card : bobHand) {
         cout << card << endl;
     }

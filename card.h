@@ -10,11 +10,12 @@ using namespace std;
 
 class Card{
     public:
-    Card(string suit, int value);
+    Card(string suit, string value);
     bool operator<(const Card& other) const;
     bool operator==(const Card& other) const;
+
     string suit;
-    int value;
+    string value;
 
     //constructor to define so default
 
@@ -22,8 +23,12 @@ class Card{
     //return value < other.value || (value == other.value && suit < other.suit);
     private:
     int getValue() const;
+    int getSuitValue() const;
+    int getOrderValue() const;
+
     };
 
+    ostream& operator<<(ostream& os, const Card& card);
 
 
 

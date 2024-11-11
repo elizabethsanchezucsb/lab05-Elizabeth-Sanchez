@@ -7,26 +7,6 @@
 
 using namespace std;
 
-bool findFirstMatch(const CardList& player_cards, const CardList& opponent_cards, Card& match_card) {
-    try {
-        Card current = player_cards.getMin();
-        while (true) {
-            if (opponent_cards.find(current)) {
-                match_card = current;
-                return true;
-            }
-            try {
-                current = player_cards.getNext(current);
-            } catch (...) {
-                break;
-            }
-        }
-    } catch (...) {
-        return false;
-    }
-    return false;
-}
-
 int main(int argc, char** argv) {
     if (argc != 3) {
         cout << "Usage: " << argv[0] << " alice_cards.txt bob_cards.txt" << endl;
@@ -65,44 +45,47 @@ int main(int argc, char** argv) {
 
     // Game logic
     bool alice_turn = true;
-    Card match_card("", "");
-    bool any_matches = false;
-    CardList alice_temp = alice_cards;
-    CardList bob_temp = bob_cards;
+    bool game_continues = true;
 
-    while (!alice_temp.empty() && !bob_temp.empty()) {
-        bool found_match = false;
+    while (game_continues && !alice_cards.empty() && !bob_cards.empty()) {
+        game_continues = false;
         
         if (alice_turn) {
-            if (findFirstMatch(alice_temp, bob_temp, match_card)) {
-                cout << "Alice picked matching card " << match_card << endl;
-                alice_cards.remove(match_card);
-                bob_cards.remove(match_card);
-                alice_temp.remove(match_card);
-                bob_temp.remove(match_card);
-                found_match = true;
-                any_matches = true;
-            }
+            try {
+                Card current = alice_cards.getMin();
+                while (true) {
+                    if (bob_cards.find(current)) {
+                        cout << "Alice picked matching card " << current << endl;
+                        alice_cards.remove(current);
+                        bob_cards.remove(current);
+                        game_continues = true;
+                        break;
+                    }
+                    current = alice_cards.getNext(current);
+                }
+            } catch (...) {}
         } else {
-            if (findFirstMatch(bob_temp, alice_temp, match_card)) {
-                cout << "Bob picked matching card " << match_card << endl;
-                alice_cards.remove(match_card);
-                bob_cards.remove(match_card);
-                alice_temp.remove(match_card);
-                bob_temp.remove(match_card);
-                found_match = true;
-                any_matches = true;
-            }
+            try {
+                Card current = bob_cards.getMin();
+                while (true) {
+                    if (alice_cards.find(current)) {
+                        cout << "Bob picked matching card " << current << endl;
+                        bob_cards.remove(current);
+                        alice_cards.remove(current);
+                        game_continues = true;
+                        break;
+                    }
+                    current = bob_cards.getNext(current);
+                }
+            } catch (...) {}
         }
         
-        if (!found_match) {
-            break;
+        if (game_continues) {
+            alice_turn = !alice_turn;
         }
-        
-        alice_turn = !alice_turn;
     }
 
-    if (any_matches) {
+    if (!alice_cards.empty() || !bob_cards.empty()) {
         cout << endl;
     }
 

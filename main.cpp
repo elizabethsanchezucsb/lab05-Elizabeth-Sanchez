@@ -44,37 +44,40 @@ int main(int argc, char** argv) {
     bob_file.close();
 
     // Game logic
-    //int turns = 0;
-    Card cards_to_match[] = {
-        Card("c", "3"),
-        Card("h", "10"),
-        Card("d", "a"),
-        Card("s", "10")
-    };
-
-    for (int i = 0; i < 4; i++) {
-        if (i % 2 == 0) {
-            // Alice's turn
-            cout << "Alice picked matching card " << cards_to_match[i] << endl;
-            if (alice_cards.find(cards_to_match[i])) {
-                alice_cards.remove(cards_to_match[i]);
-            }
-            if (bob_cards.find(cards_to_match[i])) {
-                bob_cards.remove(cards_to_match[i]);
+    bool found_match = false;
+    bool alice_turn = true;
+    
+    while (!alice_cards.empty() && !bob_cards.empty()) {
+        if (alice_turn) {
+            Card current = alice_cards.getMin();
+            if (bob_cards.find(current)) {
+                cout << "Alice picked matching card " << current << endl;
+                alice_cards.remove(current);
+                bob_cards.remove(current);
+                found_match = true;
+            } else {
+                break;  // No match found on Alice\'s turn
             }
         } else {
-            // Bob's turn
-            cout << "Bob picked matching card " << cards_to_match[i] << endl;
-            if (bob_cards.find(cards_to_match[i])) {
-                bob_cards.remove(cards_to_match[i]);
-            }
-            if (alice_cards.find(cards_to_match[i])) {
-                alice_cards.remove(cards_to_match[i]);
+            Card current = bob_cards.getMin();
+            if (alice_cards.find(current)) {
+                cout << "Bob picked matching card " << current << endl;
+                bob_cards.remove(current);
+                alice_cards.remove(current);
+                found_match = true;
+            } else {
+                break;  // No match found on Bob\'s turn
             }
         }
+        alice_turn = !alice_turn;
     }
 
-    cout << endl << "Alice's cards:" << endl;
+    // If no matches were found, just print the cards
+    if (!found_match) {
+        cout << endl;
+    }
+
+    cout << "Alice's cards:" << endl;
     alice_cards.print();
 
     cout << endl << "Bob's cards:" << endl;

@@ -7,16 +7,19 @@
 
 using namespace std;
 
-bool hasMatch(const CardList& player_cards, const CardList& opponent_cards, Card& match_card) {
-    Card current("", "");  // Initialize with empty strings
+bool findFirstMatch(const CardList& player_cards, const CardList& opponent_cards, Card& match_card) {
     try {
-        current = player_cards.getMin();
+        Card current = player_cards.getMin();
         while (true) {
             if (opponent_cards.find(current)) {
                 match_card = current;
                 return true;
             }
-            current = player_cards.getNext(current);
+            try {
+                current = player_cards.getNext(current);
+            } catch (...) {
+                break;
+            }
         }
     } catch (...) {
         return false;
@@ -62,35 +65,44 @@ int main(int argc, char** argv) {
 
     // Game logic
     bool alice_turn = true;
-    bool found_match = false;
-    Card match_card("", "");  // Initialize with empty strings
-    
-    while (!alice_cards.empty() && !bob_cards.empty()) {
+    Card match_card("", "");
+    bool any_matches = false;
+    CardList alice_temp = alice_cards;
+    CardList bob_temp = bob_cards;
+
+    while (!alice_temp.empty() && !bob_temp.empty()) {
+        bool found_match = false;
+        
         if (alice_turn) {
-            if (hasMatch(alice_cards, bob_cards, match_card)) {
+            if (findFirstMatch(alice_temp, bob_temp, match_card)) {
                 cout << "Alice picked matching card " << match_card << endl;
                 alice_cards.remove(match_card);
                 bob_cards.remove(match_card);
+                alice_temp.remove(match_card);
+                bob_temp.remove(match_card);
                 found_match = true;
-            } else {
-                break;
+                any_matches = true;
             }
         } else {
-            if (hasMatch(bob_cards, alice_cards, match_card)) {
+            if (findFirstMatch(bob_temp, alice_temp, match_card)) {
                 cout << "Bob picked matching card " << match_card << endl;
-                bob_cards.remove(match_card);
                 alice_cards.remove(match_card);
+                bob_cards.remove(match_card);
+                alice_temp.remove(match_card);
+                bob_temp.remove(match_card);
                 found_match = true;
-            } else {
-                break;
+                any_matches = true;
             }
         }
+        
+        if (!found_match) {
+            break;
+        }
+        
         alice_turn = !alice_turn;
     }
 
-    if (found_match) {
-        cout << endl;
-    } else {
+    if (any_matches) {
         cout << endl;
     }
 

@@ -52,18 +52,19 @@ int main(int argc, char** argv) {
 
     // Game logic
     bool matchFound;
-    bool aliceTurn = true;  // Flag to alternate turns
+    bool aliceTurn = true;
     bool anyMatchFound = false;
 
     do {
         matchFound = false;
-        Card match("", "");
 
         if (aliceTurn) {
             // Alice's turn
-            try {
+            if (!alice_cards.empty()) {
                 Card current = alice_cards.getMin();
-                while (true) {
+                bool keepSearching = true;
+                
+                while (keepSearching) {
                     if (bob_cards.find(current)) {
                         cout << "Alice picked matching card " << current << endl;
                         bob_cards.remove(current);
@@ -72,14 +73,25 @@ int main(int argc, char** argv) {
                         anyMatchFound = true;
                         break;
                     }
-                    current = alice_cards.getNext(current);
+                    
+                    if (alice_cards.empty()) {
+                        keepSearching = false;
+                    } else {
+                        try {
+                            current = alice_cards.getNext(current);
+                        } catch (...) {
+                            keepSearching = false;
+                        }
+                    }
                 }
-            } catch (...) {}
+            }
         } else {
             // Bob's turn
-            try {
+            if (!bob_cards.empty()) {
                 Card current = bob_cards.getMin();
-                while (true) {
+                bool keepSearching = true;
+                
+                while (keepSearching) {
                     if (alice_cards.find(current)) {
                         cout << "Bob picked matching card " << current << endl;
                         alice_cards.remove(current);
@@ -88,18 +100,25 @@ int main(int argc, char** argv) {
                         anyMatchFound = true;
                         break;
                     }
-                    current = bob_cards.getNext(current);
+                    
+                    if (bob_cards.empty()) {
+                        keepSearching = false;
+                    } else {
+                        try {
+                            current = bob_cards.getNext(current);
+                        } catch (...) {
+                            keepSearching = false;
+                        }
+                    }
                 }
-            } catch (...) {}
+            }
         }
 
-        // Switch turns only if a match was found
         if (matchFound) {
             aliceTurn = !aliceTurn;
         }
     } while (matchFound && !alice_cards.empty() && !bob_cards.empty());
 
-    // Print final hands
     if (anyMatchFound) {
         cout << endl;
     }

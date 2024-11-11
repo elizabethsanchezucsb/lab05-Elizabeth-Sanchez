@@ -7,20 +7,21 @@
 
 using namespace std;
 
-Card findMatch(const CardList& player_cards, const CardList& opponent_cards) {
-    Card cards_to_try[] = {
-        Card("c", "3"),
-        Card("h", "10"),
-        Card("d", "a"),
-        Card("s", "10")
-    };
-    
-    for (const Card& card : cards_to_try) {
-        if (player_cards.find(card) && opponent_cards.find(card)) {
-            return card;
+bool hasMatch(const CardList& player_cards, const CardList& opponent_cards, Card& match_card) {
+    Card current("", "");  // Initialize with empty strings
+    try {
+        current = player_cards.getMin();
+        while (true) {
+            if (opponent_cards.find(current)) {
+                match_card = current;
+                return true;
+            }
+            current = player_cards.getNext(current);
         }
+    } catch (...) {
+        return false;
     }
-    return Card("", ""); // No match found
+    return false;
 }
 
 int main(int argc, char** argv) {
@@ -60,42 +61,36 @@ int main(int argc, char** argv) {
     bob_file.close();
 
     // Game logic
-    //bool alice_turn = true;
+    bool alice_turn = true;
     bool found_match = false;
+    Card match_card("", "");  // Initialize with empty strings
     
-    // First match: c 3
-    if (alice_cards.find(Card("c", "3")) && bob_cards.find(Card("c", "3"))) {
-        cout << "Alice picked matching card c 3" << endl;
-        alice_cards.remove(Card("c", "3"));
-        bob_cards.remove(Card("c", "3"));
-        found_match = true;
-    }
-    
-    // Second match: h 10
-    if (alice_cards.find(Card("h", "10")) && bob_cards.find(Card("h", "10"))) {
-        cout << "Bob picked matching card h 10" << endl;
-        alice_cards.remove(Card("h", "10"));
-        bob_cards.remove(Card("h", "10"));
-        found_match = true;
-    }
-    
-    // Third match: d a
-    if (alice_cards.find(Card("d", "a")) && bob_cards.find(Card("d", "a"))) {
-        cout << "Alice picked matching card d a" << endl;
-        alice_cards.remove(Card("d", "a"));
-        bob_cards.remove(Card("d", "a"));
-        found_match = true;
-    }
-    
-    // Fourth match: s 10
-    if (alice_cards.find(Card("s", "10")) && bob_cards.find(Card("s", "10"))) {
-        cout << "Bob picked matching card s 10" << endl;
-        alice_cards.remove(Card("s", "10"));
-        bob_cards.remove(Card("s", "10"));
-        found_match = true;
+    while (!alice_cards.empty() && !bob_cards.empty()) {
+        if (alice_turn) {
+            if (hasMatch(alice_cards, bob_cards, match_card)) {
+                cout << "Alice picked matching card " << match_card << endl;
+                alice_cards.remove(match_card);
+                bob_cards.remove(match_card);
+                found_match = true;
+            } else {
+                break;
+            }
+        } else {
+            if (hasMatch(bob_cards, alice_cards, match_card)) {
+                cout << "Bob picked matching card " << match_card << endl;
+                bob_cards.remove(match_card);
+                alice_cards.remove(match_card);
+                found_match = true;
+            } else {
+                break;
+            }
+        }
+        alice_turn = !alice_turn;
     }
 
     if (found_match) {
+        cout << endl;
+    } else {
         cout << endl;
     }
 

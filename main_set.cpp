@@ -9,82 +9,91 @@
 
 
 using namespace std;
-int main(int argc, char** argv) {  // Changed from char* argv[]
-    if (argc != 3) {
-        cout << "Usage: " << argv[0] << " alice_cards.txt bob_cards.txt" << endl;
+
+int main(int argc, char** argv){
+    if(argc < 3){
+        cout << "Please provide 2 file names" << endl;
+        return 1;
+    }
+  
+    ifstream cardFile1(argv[1]);
+    ifstream cardFile2(argv[2]);
+
+    if (cardFile1.fail() || cardFile2.fail()){
+        cout << "Could not open file " << argv[2];
         return 1;
     }
 
-    CardList alice_cards;
-    CardList bob_cards;
+    set<Card> aliceHand, bobHand;
+    string suit, value;
+    string line;
 
     // Read Alice's cards
-    string alice_filename(argv[1]);  // Convert char* to string
-    ifstream alice_file(alice_filename);
-    if (!alice_file.is_open()) {
-        cout << "Could not open " << alice_filename << endl;
-        return 1;
+    while (getline(cardFile1, line) && !line.empty()){
+        istringstream iss(line);
+        if(iss >> suit >> value){
+            aliceHand.insert(Card(suit, value));
+        }
     }
-
-    string suit, value;
-    while (alice_file >> suit >> value) {
-        alice_cards.insert(Card(suit, value));
-    }
-    alice_file.close();
+    cardFile1.close();
 
     // Read Bob's cards
-    string bob_filename(argv[2]);  // Convert char* to string
-    ifstream bob_file(bob_filename);
-    if (!bob_file.is_open()) {
-        cout << "Could not open " << bob_filename << endl;
-        return 1;
+    while (getline(cardFile2, line) && !line.empty()){
+        istringstream iss(line);
+        if(iss >> suit >> value){
+            bobHand.insert(Card(suit, value));
+        }
     }
-
-    while (bob_file >> suit >> value) {
-        bob_cards.insert(Card(suit, value));
-    }
-    bob_file.close();
+    cardFile2.close();
 
     // Game logic
-    bool alice_turn = true;
-    while (true) {
-        bool found_match = false;
+    bool matchFound;
+    bool aliceTurn = true;  // Flag to alternate turns
+    do {
+        matchFound = false;
 
-        if (alice_turn) {
-            CardNode* current = alice_cards.findMin();
-            while (current) {
-                if (bob_cards.find(current->card)) {
-                    cout << "Alice picked matching card " << current->card << endl;
-                    bob_cards.remove(current->card);
-                    alice_cards.remove(current->card);
-                    found_match = true;
+        if (aliceTurn) {
+            // Alice's turn
+            for (auto it = aliceHand.begin(); it != aliceHand.end(); ++it) {
+                if (bobHand.find(*it) != bobHand.end()) {
+                    cout << "Alice picked matching card " << *it << endl;
+                    bobHand.erase(*it);
+                    aliceHand.erase(it);
+                    matchFound = true;
                     break;
                 }
-                current = alice_cards.findNext(current);
             }
         } else {
-            CardNode* current = bob_cards.findMin();
-            while (current) {
-                if (alice_cards.find(current->card)) {
-                    cout << "Bob picked matching card " << current->card << endl;
-                    alice_cards.remove(current->card);
-                    bob_cards.remove(current->card);
-                    found_match = true;
+            // Bob's turn
+            for (auto it = bobHand.rbegin(); it != bobHand.rend(); ++it) {
+                if (aliceHand.find(*it) != aliceHand.end()) {
+                    cout << "Bob picked matching card " << *it << endl;
+                    aliceHand.erase(*it);
+                    bobHand.erase(--it.base());
+                    matchFound = true;
                     break;
                 }
-                current = bob_cards.findNext(current);
             }
         }
 
-        if (!found_match) break;
-        alice_turn = !alice_turn;
+        // Switch turns only if a match was found
+        if (matchFound) {
+            aliceTurn = !aliceTurn;
+        }
+    } while (matchFound);
+
+    // Print final hands
+    cout << endl;
+cout << "Alice's cards:" << endl;
+    for (const auto& card : aliceHand) {
+        cout << card << endl;
     }
+    cout << endl;
 
-    cout << "\nAlice's cards:" << endl;
-    alice_cards.print();
-
-    cout << "\nBob's cards:" << endl;
-    bob_cards.print();
+cout << "Bob's cards:" << endl;
+    for (const auto& card : bobHand) {
+        cout << card << endl;
+    }
 
     return 0;
 }

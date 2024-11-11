@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     bob_file.close();
 
     // Game logic
-    int turns = 0;
+    //int turns = 0;
     Card cards_to_match[] = {
         Card("c", "3"),
         Card("h", "10"),

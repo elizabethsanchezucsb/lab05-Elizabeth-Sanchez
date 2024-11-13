@@ -1,14 +1,9 @@
 // card_list.cpp
 #include "card_list.h"
 #include <iostream>
-#include <stdexcept>
 
-// Destructor
-CardList::~CardList() {
-    deleteTree(root);
-}
-
-void CardList::deleteTree(CardNode* node) {
+// Add the missing deleteTree implementation
+void CardList::deleteTree(Node* node) {
     if (node) {
         deleteTree(node->left);
         deleteTree(node->right);
@@ -16,139 +11,88 @@ void CardList::deleteTree(CardNode* node) {
     }
 }
 
-// Insert a card into the BST
+void CardList::insertHelper(Node*& node, const Card& card) {
+    if (!node) {
+        node = new Node(card);
+        return;
+    }
+    if (card < node->card) {
+        insertHelper(node->left, card);
+    } else if (node->card < card) {
+        insertHelper(node->right, card);
+    }
+}
+
 void CardList::insert(const Card& card) {
-    CardNode** curr = &root;
-    while (*curr) {
-        if (card < (*curr)->card) {
-            curr = &((*curr)->left);
-        } else if ((*curr)->card < card) {
-            curr = &((*curr)->right);
-        } else {
-            return; // Card already exists
-        }
-    }
-    *curr = new CardNode(card);
+    insertHelper(root, card);
 }
 
-// Find a card in the BST
+bool CardList::findHelper(Node* node, const Card& card) const {
+    if (!node) return false;
+    if (card == node->card) return true;
+    if (card < node->card) return findHelper(node->left, card);
+    return findHelper(node->right, card);
+}
+
 bool CardList::find(const Card& card) const {
-    CardNode* curr = root;
-    while (curr) {
-        if (card < curr->card) {
-            curr = curr->left;
-        } else if (curr->card < card) {
-            curr = curr->right;
-        } else {
-            return true;
-        }
-    }
-    return false;
+    return findHelper(root, card);
 }
 
-// Find minimum card in the tree/subtree
-CardNode* CardList::findMin(CardNode* node) const {
-    if (!node) return nullptr;
-    while (node->left) {
+CardList::Node* CardList::findMin(Node* node) const {
+    while (node && node->left) {
         node = node->left;
     }
     return node;
 }
 
-// Get minimum card
-Card CardList::getMin() const {
-    CardNode* min = findMin(root);
-    if (!min) {
-        throw std::runtime_error("Empty tree");
-    }
-    return min->card;
-}
-
-// Find next card in order
-CardNode* CardList::findNext(CardNode* node, const Card& card) const {
-    CardNode* curr = root;
-    CardNode* successor = nullptr;
+void CardList::removeHelper(Node*& node, const Card& card) {
+    if (!node) return;
     
-    while (curr) {
-        if (card < curr->card) {
-            successor = curr;
-            curr = curr->left;
-        } else if (curr->card < card) {
-            curr = curr->right;
+    if (card < node->card) {
+        removeHelper(node->left, card);
+    } else if (node->card < card) {
+        removeHelper(node->right, card);
+    } else {
+        if (!node->left) {
+            Node* temp = node->right;
+            delete node;
+            node = temp;
+        } else if (!node->right) {
+            Node* temp = node->left;
+            delete node;
+            node = temp;
         } else {
-            if (curr->right) {
-                return findMin(curr->right);
-            }
-            return successor;
+            Node* temp = findMin(node->right);
+            node->card = temp->card;
+            removeHelper(node->right, temp->card);
         }
     }
-    return successor;
 }
 
-// Get next card
-Card CardList::getNext(const Card& card) const {
-    CardNode* next = findNext(root, card);
-    if (!next) {
-        throw std::runtime_error("No successor found");
-    }
-    return next->card;
-}
-
-// Remove a card from the BST
 void CardList::remove(const Card& card) {
-    CardNode** curr = &root;
-    CardNode* temp = nullptr;
-    
-    // Find the node to remove
-    while (*curr && (*curr)->card != card) {
-        if (card < (*curr)->card) {
-            curr = &((*curr)->left);
-        } else {
-            curr = &((*curr)->right);
-        }
-    }
-    
-    if (!*curr) return; // Card not found
-    
-    // Case 1: No right child
-    if (!(*curr)->right) {
-        temp = *curr;
-        *curr = (*curr)->left;
-        delete temp;
-    }
-    // Case 2: No left child
-    else if (!(*curr)->left) {
-        temp = *curr;
-        *curr = (*curr)->right;
-        delete temp;
-    }
-    // Case 3: Two children
-    else {
-        // Find successor (minimum element in right subtree)
-        CardNode** successor = &((*curr)->right);
-        while ((*successor)->left) {
-            successor = &((*successor)->left);
-        }
-        
-        // Copy successor's data
-        (*curr)->card = (*successor)->card;
-        
-        // Remove successor
-        temp = *successor;
-        *successor = (*successor)->right;
-        delete temp;
-    }
+    removeHelper(root, card);
 }
 
-// Print the BST in-order
-void CardList::print() const {
-    printInOrder(root);
+void CardList::printHelper(Node* node, std::ostream& os) const {
+    if (!node) return;
+    printHelper(node->left, os);
+    os << node->card << std::endl;
+    printHelper(node->right, os);
 }
 
-void CardList::printInOrder(CardNode* node) const {
-    if (node) {
-        printInOrder(node->left);
-        std::cout << node->card << std::endl;
-        printInOrder(node->right);
-    }
+void CardList::print(std::ostream& os) const {
+    printHelper(root, os);
+}
+
+std::vector<Card> CardList::getAllCards() const {
+    std::vector<Card> cards;
+    getAllCardsHelper(root, cards);
+    return cards;
+}
+
+void CardList::getAllCardsHelper(Node* node, std::vector<Card>& cards) const {
+    if (!node) return;
+    getAllCardsHelper(node->left, cards);
+    cards.push_back(node->card);
+    getAllCardsHelper(node->right, cards);
 }

@@ -3,39 +3,36 @@
 #define CARD_LIST_H
 
 #include "card.h"
-
-struct CardNode {
-    Card card;
-    CardNode* left;
-    CardNode* right;
-    CardNode(const Card& c) : card(c), left(nullptr), right(nullptr) {}
-};
+#include <vector>
 
 class CardList {
 private:
-    CardNode* root;
+    struct Node {
+        Card card;
+        Node* left;
+        Node* right;
+        Node(const Card& c) : card(c), left(nullptr), right(nullptr) {}
+    };
 
-    // Private helper functions
-    CardNode* findMin(CardNode* node) const;
-    CardNode* findNext(CardNode* node, const Card& card) const;
-    void deleteTree(CardNode* node);
-    void printInOrder(CardNode* node) const;  // Added this line
+    Node* root;
+
+    void insertHelper(Node*& node, const Card& card);
+    bool findHelper(Node* node, const Card& card) const;
+    void removeHelper(Node*& node, const Card& card);
+    void printHelper(Node* node, std::ostream& os) const;
+    Node* findMin(Node* node) const;
+    void deleteTree(Node* node);
+    void getAllCardsHelper(Node* node, std::vector<Card>& cards) const;
 
 public:
-    // Constructor and destructor
     CardList() : root(nullptr) {}
-    ~CardList();
-
-    // Basic BST operations
+    ~CardList() { deleteTree(root); }
+    
     void insert(const Card& card);
     bool find(const Card& card) const;
     void remove(const Card& card);
-    void print() const;
-    bool empty() const { return root == nullptr; }  // Added empty() function
-    
-    // Helper functions for game logic
-    Card getMin() const;  // Modified to return Card instead of CardNode*
-    Card getNext(const Card& card) const;  // Modified to return Card instead of CardNode*
+    void print(std::ostream& os) const;
+    std::vector<Card> getAllCards() const;
 };
 
 #endif

@@ -13,6 +13,10 @@ tests: card.o card_list.o tests.o
 	${CXX} ${CXXFLAGS} card.o card_list.o tests.o -o tests
 	./tests
 
+testsB: card.o card_list.o testsB.o
+	${CXX} ${CXXFLAGS} card.o card_list.o testsB.o -o testB
+	./testB
+
 main_set.o: main_set.cpp
 	${CXX} ${CXXFLAGS} main_set.cpp -c
 
@@ -22,9 +26,11 @@ main.o: main.cpp
 tests.o: tests.cpp
 	${CXX} ${CXXFLAGS} tests.cpp -c
 
+testB.o: testsB.cpp
+	${CXX} ${CXXFLAGS} testsB.cpp -c
+
 card_list.o: card_list.cpp card_list.h
 	${CXX} ${CXXFLAGS} card_list.cpp -c
-
 card.o: card.cpp card.h
 	${CXX} ${CXXFLAGS} card.cpp -c
 
